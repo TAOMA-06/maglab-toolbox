@@ -140,24 +140,24 @@
 
           <div class="field">
             <div class="field-head"><label>配置标签</label><span class="field-help">用于 A/B 报告</span></div>
-            <input class="text-input" id="configLabel" type="text" maxlength="40" placeholder="例如：1.50mm / RT 0.10">
+            <input class="text-input" id="configLabel" type="text" maxlength="40" placeholder="例如：0.70mm / RT 0.30">
           </div>
 
           <details class="hardware-details">
             <summary>当前键盘设置与硬件画像 <span>用于报告建议</span></summary>
             <div class="hardware-grid">
-              <label class="hw-field">触发行程 <input type="number" id="hwActuation" min="0.1" max="4" step="0.05" value="1.50"><small>mm</small></label>
-              <label class="hw-field">顶部死区 <input type="number" id="hwTop" min="0" max="0.5" step="0.05" value="0.15"><small>mm</small></label>
+              <label class="hw-field">触发行程 <input type="number" id="hwActuation" min="0.1" max="4" step="0.05" value="0.70"><small>mm</small></label>
+              <label class="hw-field">顶部死区 <input type="number" id="hwTop" min="0" max="0.5" step="0.05" value="0.10"><small>mm</small></label>
               <label class="hw-field">底部死区 <input type="number" id="hwBottom" min="0" max="0.6" step="0.05" value="0.30"><small>mm</small></label>
-              <label class="hw-field">RT 按下 <input type="number" id="hwRtPress" min="0.01" max="0.5" step="0.01" value="0.10"><small>mm</small></label>
-              <label class="hw-field">RT 抬起 <input type="number" id="hwRtRelease" min="0.01" max="0.5" step="0.01" value="0.10"><small>mm</small></label>
+              <label class="hw-field">RT 按下 <input type="number" id="hwRtPress" min="0.01" max="0.5" step="0.01" value="0.25"><small>mm</small></label>
+              <label class="hw-field">RT 抬起 <input type="number" id="hwRtRelease" min="0.01" max="0.5" step="0.01" value="0.30"><small>mm</small></label>
               <div class="hw-switch-row">
                 <button class="switch" id="hwRtToggle" type="button" role="switch" aria-checked="true" aria-label="Rapid Trigger 开关"><span></span></button>
                 <span id="hwRtLabel">RT 已开启</span>
               </div>
               <div class="hw-switch-row">
-                <button class="switch" id="hwContinuousToggle" type="button" role="switch" aria-checked="true" aria-label="连续 RT 开关"><span></span></button>
-                <span id="hwContinuousLabel">连续 RT 开启</span>
+                <button class="switch" id="hwContinuousToggle" type="button" role="switch" aria-checked="false" aria-label="连续 RT 开关"><span></span></button>
+                <span id="hwContinuousLabel">连续 RT 关闭</span>
               </div>
               <div class="hw-switch-row">
                 <button class="switch" id="hwFingersToggle" type="button" role="switch" aria-checked="true" aria-label="手指是否常搭 WASD"><span></span></button>
@@ -460,6 +460,7 @@
           <div>
             <p class="settings-intro" id="settingsIntro">—</p>
             <div class="recommend-grid" id="recommendGrid"></div>
+            <p class="pro-ref" id="proRef"></p>
             <p class="settings-warning">参数只影响输入被游戏读到的时刻，不能替代松键、反键和开枪时机。先固定技术，再用相同 20 次做 A/B。</p>
           </div>
           <div class="ab-cta">

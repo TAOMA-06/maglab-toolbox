@@ -287,14 +287,16 @@
 
   const STORAGE_KEY = 'maglab_pro_v1';
 
+  // 默认值对齐社区证据：Wooting CS2 新手基线 WASD 0.7 / RT 0.5；
+  // WASD 推荐 0.4–0.7mm，RT 释放 0.2–0.5mm，连续 RT 默认关，RT 只开 WASD。
   const DEFAULT_HARDWARE = {
-    actuation: 1.50,
-    top: 0.15,
+    actuation: 0.70,
+    top: 0.10,
     bottom: 0.30,
     rtOn: true,
-    rtPress: 0.10,
-    rtRelease: 0.10,
-    continuous: true,
+    rtPress: 0.25,
+    rtRelease: 0.30,
+    continuous: false,
     misTouch: 2,
     pressStyle: 'balanced',
     fingersRest: true
@@ -2348,14 +2350,14 @@
           tag: '松键时序',
           tone: 'warn',
           title: `${pct(overlap)} 的切换出现双键重叠`,
-          text: `中位间隔 ${signed(gap)}。重叠期间两键同时按住，移动输入为 0，只剩摩擦，反向加速没有生效。先练先松后按；RT 抬起可以试 0.08–0.10mm。`
+          text: `中位间隔 ${signed(gap)}。重叠期间两键同时按住，移动输入为 0，只剩摩擦，反向加速没有生效。先练先松后按；RT 抬起可以试 0.20–0.25mm（手指稳再往 0.15 探）。`
         });
       } else if (dead > 0.25) {
         issues.push({
           tag: '松键时序',
           tone: 'warn',
           title: `${pct(dead)} 的切换有 >35ms 空档`,
-          text: `中位间隔 ${signed(gap)}。旧键松开后反键按得晚，损失了反向加速。先让“松旧键→点反键”成为一个动作；RT 按下 0.08–0.10mm 可让反键更早被读到。`
+          text: `中位间隔 ${signed(gap)}。旧键松开后反键按得晚，损失了反向加速。先让“松旧键→点反键”成为一个动作；RT 按下 0.20–0.25mm 可让反键更早被读到。`
         });
       } else if (metrics.underTapRate > 0.3) {
         issues.push({
@@ -2369,7 +2371,7 @@
           tag: '反键过冲',
           tone: 'warn',
           title: `${pct(overshoot)} 的切换出现反向过冲`,
-          text: `中位过冲 ${Math.round(metrics.overshootMedian)} u/s。反键松得偏晚，速度已经反向。先练在 0 点松反键；RT 抬起可以试 0.08–0.10mm。`
+          text: `中位过冲 ${Math.round(metrics.overshootMedian)} u/s。反键松得偏晚，速度已经反向。先练在 0 点松反键；如果动作稳定仍过冲，把 RT 抬起往大调（+0.05–0.10mm），不要往 0.1mm 挤。`
         });
       } else {
         issues.push({
@@ -2509,27 +2511,33 @@
     if (Number(hw.top) < 0.1) risk += 0.1;
     risk = clamp(risk, 0, 1);
 
-    let actuation = 1.50;
-    actuation += (risk - 0.4) * 0.35;
+    // 证据基线：WASD 触发 0.4–0.7mm（新手从 0.7 起），RT 释放 0.2–0.5mm。
+    // 来源：Wooting CS2 官方基线（0.7 / 0.5，连续 RT 关）与社区共识；
+    // 职业快照：ZywOo 1.2/0.2、ropz 1.2/0.1、donk 1.5/0.4、NiKo 1.2/0.3（触发/RT，mm）。
+    // 0.1mm 级触发/释放是抖动重灾区（传感器噪声、误触），不要当作目标值。
+    let actuation = 0.70;
+    actuation += (risk - 0.4) * 0.50;
     if (metrics.gapMedian > 35) actuation -= 0.10;
     if (metrics.overlapRate > 0.25) actuation += 0.10;
     if (metrics.underTapRate > 0.30) actuation -= 0.05;
     if (metrics.accuracyRate < 0.65) actuation += 0.05;
-    actuation = clamp(roundTo(actuation, 0.05), 1.0, 2.0);
+    actuation = clamp(roundTo(actuation, 0.05), 0.40, 1.20);
 
     const top = clamp(roundTo(0.10 + risk * 0.15, 0.05), 0.10, 0.30);
     const bottom = clamp(roundTo(0.30 + (metrics.overshootRate > 0.25 ? 0.05 : 0), 0.05), 0.25, 0.45);
 
-    let rtPress = 0.10;
-    rtPress += (metrics.gapMedian > 35 ? -0.015 : 0);
-    rtPress += risk * 0.03;
-    rtPress = clamp(roundTo(rtPress, 0.01), 0.07, 0.18);
+    let rtPress = 0.25;
+    rtPress += (metrics.gapMedian > 35 ? -0.03 : 0);
+    rtPress += risk * 0.05;
+    rtPress = clamp(roundTo(rtPress, 0.01), 0.15, 0.35);
 
-    let rtRelease = 0.10;
-    rtRelease += (metrics.overlapRate > 0.25 ? -0.02 : 0);
-    rtRelease += (metrics.overshootRate > 0.25 ? -0.015 : 0);
-    rtRelease += risk * 0.04;
-    rtRelease = clamp(roundTo(rtRelease, 0.01), 0.07, 0.20);
+    // 释放距离：重叠/过冲高 → 加大释放距离防抖（社区经验：停不稳先 +0.1mm），
+    // 而不是一味收紧。0.2mm 是多数人的下限，0.1mm 只适合手指极稳的玩家。
+    let rtRelease = 0.30;
+    rtRelease += (metrics.overlapRate > 0.25 ? 0.05 : 0);
+    rtRelease += (metrics.overshootRate > 0.25 ? 0.05 : 0);
+    rtRelease += risk * 0.10;
+    rtRelease = clamp(roundTo(rtRelease, 0.05), 0.20, 0.50);
 
     const control = clamp(
       0.45 * metrics.accuracyRate +
@@ -2538,7 +2546,9 @@
       0.15 * (1 - clamp(metrics.consistencyCv, 0, 1)),
       0, 1
     );
-    const continuous = control > 0.58 && risk < 0.70 ? '开启' : '关闭';
+    // 连续 RT 默认不建议开启（Wooting 官方同样不作为默认推荐）：
+    // 只有控制分很高且误触风险很低时才开。
+    const continuous = control > 0.70 && risk < 0.50 ? '开启' : '关闭';
     return { actuation, top, bottom, rtPress, rtRelease, continuous, risk, control };
   }
 
@@ -2570,6 +2580,12 @@
         <p>${card.sub}</p>
       </div>
     `).join('');
+    const proRef = $('#proRef');
+    if (proRef) {
+      proRef.innerHTML = '职业参考（快照，非标准）：ZywOo 1.2 / 0.2 · ropz 1.2 / 0.1 · donk 1.5 / 0.4 · NiKo 1.2 / 0.3（触发 / RT，mm）。'
+        + 'Wooting CS2 新手基线：WASD 0.7 / RT 0.5，连续 RT 关，RT 只开 WASD（拆包键 E 必须关 RT）。'
+        + '理论锚点（AK-47，1ms 模型）：立即反键约 75ms 进精度带，松键等待约 207ms；真实服务器为 64 tick，急停落在下一个 tick，浏览器会有数毫秒输入抖动。';
+    }
   }
 
   function renderABComparison() {
@@ -2999,7 +3015,7 @@
       pressure: true,
       pressureReps: 8,
       pressureWindow: 900,
-      label: '示例 · 1.50mm / RT 0.10',
+      label: '示例 · 0.70mm / RT 0.30',
       hardware: { ...DEFAULT_HARDWARE },
       samples,
       pressureSamples,

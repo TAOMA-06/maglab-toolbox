@@ -2823,6 +2823,8 @@ tr.recommended td:first-child { color: var(--lime); }
 .recommend-card.primary { border-color: rgba(215, 255, 63, 0.25); background: rgba(215, 255, 63, 0.04); }
 .recommend-card.primary b { color: var(--lime); }
 .settings-warning { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); color: var(--amber); font-size: 9px; line-height: 1.7; }
+.pro-ref { margin: 12px 0 0; color: var(--muted); font-size: 9px; line-height: 1.8; }
+.pro-ref:empty { display: none; }
 .ab-cta { padding: 18px; border: 1px solid rgba(72, 223, 255, 0.18); border-radius: 12px; background: rgba(72, 223, 255, 0.025); }
 .ab-cta > span { color: var(--cyan); font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; }
 .ab-cta h3 { margin: 9px 0 8px; font-size: 21px; line-height: 1.2; letter-spacing: -0.02em; }
