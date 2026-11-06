@@ -34,11 +34,12 @@
           <div class="eyebrow"><span class="pulse-dot"></span> MAGLAB TOOLBOX</div>
           <h1>磁轴设置 ·<br><span class="text-lime">CS2 辅助工具箱</span></h1>
           <p class="lead">
-            把已有的磁轴急停实验室与鼠标传感器角度检测、CS2 电脑运算延迟优化融入同一工具箱。
+            把已有的磁轴急停实验室与鼠标传感器角度检测、CS2 电脑运算延迟优化融入同一工具箱；
+            Windows 桌面版另可从 ProSettings.net 拉取职业哥外设与灵敏度。
             所有计算在本机完成，不上传任何数据。
           </p>
           <div class="pro-stats">
-            <div><b>3</b><span>工具模块</span></div>
+            <div><b>4</b><span>工具模块</span></div>
             <div><b>本地</b><span>仅本机运行</span></div>
             <div><b>Win</b><span>Windows 桌面</span></div>
           </div>
@@ -139,6 +140,26 @@
             <button class="btn btn-ghost btn-sm" id="aboutOpt" type="button">使用说明</button>
           </div>
         </div>
+
+        <div class="panel tool-card" id="card-prosettings">
+          <div class="panel-head">
+            <h3>模块四 · Pro 外设 / 灵敏度查询</h3><span>PROSETTINGS</span>
+          </div>
+          <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:16px">
+            在 Windows 下运行仓库里的 <code style="font-size:11px;color:var(--cyan)">main.py</code> 桌面程序，
+            使用「Pro 外设/设置」标签页：输入选手 ID（如 <code style="font-size:11px">s1mple</code>）或粘贴 ProSettings 选手页链接，
+            即可从 <a href="https://prosettings.net/" target="_blank" rel="noopener">ProSettings.net</a> 抓取外设列表、鼠标灵敏度、eDPI、分辨率与视频选项等（纯 HTML 解析，随原站结构变化可能需要更新）。
+          </p>
+          <div class="tool-meta">
+            <span class="tag">桌面版 · 联网</span>
+            <span class="tag">本机展示</span>
+            <span class="tag">不写注册表</span>
+          </div>
+          <div class="tool-actions">
+            <span class="btn btn-primary" style="opacity:0.85;cursor:default">请运行 main.py 打开</span>
+            <button class="btn btn-ghost btn-sm" id="aboutProSettings" type="button">说明</button>
+          </div>
+        </div>
       </div>
 
       <section class="pro-section">
@@ -175,6 +196,6 @@
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="tools.js?v=1.0"></script>
+  <script src="tools.js?v=1.1"></script>
 </body>
 </html>

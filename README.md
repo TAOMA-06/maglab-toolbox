@@ -1,15 +1,16 @@
 # MAGLAB 磁轴工具箱 · CS2 辅助工具集
 
-一个给 CS2 玩家（包括职业/半职业）用的**本机工具箱**：磁轴参数急停验证、鼠标传感器角度校准、电脑运算延迟优化。纯 HTML/CSS/JS + 一个可选的 Windows 桌面壳，无构建步骤、无第三方依赖、无网络请求，所有数据只保存在本机。
+一个给 CS2 玩家（包括职业/半职业）用的**本机工具箱**：磁轴参数急停验证、鼠标传感器角度校准、电脑运算延迟优化。纯 HTML/CSS/JS + 一个可选的 Windows 桌面壳，无构建步骤、无第三方依赖；**网页模块不主动联网**，所有数据只保存在本机。**桌面版**另含从 [ProSettings.net](https://prosettings.net/) 拉取职业选手外设与灵敏度（需联网）。
 
 | 模块 | 入口 | 一句话 |
 |---|---|---|
 | 模块一 · 磁轴设置 / 急停实验室 | `index.html` | Source 物理重建速度曲线，量化急停动作 + A/B 磁轴参数 |
 | 模块二 · 鼠标传感器旋转角度 | `sensor.html` | 水平滑动测轨迹偏移，给出鼠标驱动"传感器旋转"补偿角度 |
 | 模块三 · 电脑运算延迟优化 | `optimizer.html` | 勾选生成优化脚本 + 回退脚本，降低 CS2 帧耗时 |
-| 导航 | `tools.html` | 三个模块入口 + 配合流程 |
+| 模块四 · Pro 外设 / 灵敏度（联网） | `main.py` →「Pro 外设/设置」 | 解析 ProSettings.net 选手页：外设、灵敏度、eDPI、分辨率/视频选项等 |
+| 导航 | `tools.html` | 各模块入口 + 配合流程 |
 
-**建议流程**：先用「模块一」确定磁轴参数基准 → 用「模块二」校准传感器角度，保证水平/竖直滑动不偏移 → 用「模块三」优化系统，看 CS2 右上角帧数左侧的毫秒数是否下降。
+**建议流程**：先用「模块一」确定磁轴参数基准 → 用「模块二」校准传感器角度，保证水平/竖直滑动不偏移 → 用「模块三」优化系统，看 CS2 右上角帧数左侧的毫秒数是否下降。若需对照职业选手外设与灵敏度，在桌面版使用「模块四」。
 
 **打开方式**：双击 `打开工具箱.bat`（或 `打开工具箱.vbs`）进导航页；各模块也可直接用 Chrome / Edge 打开对应 `html`。Windows 桌面版见 [main.py](#windows-桌面版可选)。
 
@@ -319,11 +320,12 @@ cl_showpos 1
 
 ## Windows 桌面版（可选）
 
-`main.py`：Python 3 + tkinter（标准库，无第三方依赖），`v1.0.0`。
+`main.py`：Python 3 + tkinter（标准库，无第三方依赖），`v1.0.1`。
 
 - 鼠标传感器旋转角度检测（显示偏向，给出推荐驱动角度）
 - CS2 电脑运算延迟优化（生成优化脚本 + 回退脚本，支持备份与还原）
 - 磁轴急停实验室入口（打开网页版）
+- **Pro 外设/设置**（`urllib` 请求 [prosettings.net](https://prosettings.net/) 选手页，`prosettings_net.py` 解析 HTML；数据版权归原作者与 ProSettings，仅供个人参考）
 
 ```bash
 python main.py
@@ -350,11 +352,12 @@ maglab-toolbox/
 ├── sensor.js / sensor.css
 ├── optimizer.html    模块三 · 电脑运算延迟优化
 ├── optimizer.js / optimizer.css
-├── tools.html        工具箱导航（三模块入口 + 配合流程）
+├── tools.html        工具箱导航（各模块入口 + 配合流程）
 ├── tools.js / tools.css
 ├── basic.html        基础习惯测试版（可选）
 ├── basic.js / basic.css
 ├── main.py           Windows 桌面版（tkinter）
+├── prosettings_net.py  ProSettings.net 页面拉取与解析（供 main.py）
 ├── 打开工具箱.bat / 打开工具箱.vbs
 ├── 打开测试.bat     打开 PRO 急停实验室
 ├── 打开基础版.bat
@@ -362,7 +365,7 @@ maglab-toolbox/
 └── README.md
 ```
 
-纯 HTML/CSS/JS，无构建步骤、无第三方依赖、无网络请求。
+纯 HTML/CSS/JS，无构建步骤、无第三方依赖；网页模块不发起网络请求（桌面版 ProSettings 查询除外）。
 
 ### 调试
 

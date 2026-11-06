@@ -5,6 +5,7 @@
 #   1. 鼠标传感器旋转角度检测（显示偏向左/右/上/下，给出推荐驱动角度）
 #   2. CS2 电脑运算延迟优化（生成优化脚本 + 回退脚本，支持备份与还原）
 #   3. 磁轴急停实验室入口（打开已有网页版）
+#   4. Pro 选手外设 / 灵敏度 / 游戏设置（从 prosettings.net 拉取并解析，需联网）
 # ============================================================================
 
 import tkinter as tk
@@ -17,10 +18,14 @@ import subprocess
 import webbrowser
 import ctypes
 import winreg
+import threading
+import re
 from datetime import datetime
 
+import prosettings_net as psn
+
 APP_TITLE = "MAGLAB 磁轴工具箱 · CS2 辅助桌面程序"
-APP_VERSION = "v1.0.0"
+APP_VERSION = "v1.0.1"
 
 # ---------------------------------------------------------------- 颜色主题
 BG       = "#06090e"
@@ -869,6 +874,168 @@ class KeyboardTab(ttk.Frame):
         else:
             messagebox.showerror("未找到", "tools.html 不在当前目录。")
 
+
+# ---------------------------------------------------------------- 模块：Pro 选手外设 / 设置（prosettings.net）
+def _normalize_prosettings_slug(text):
+    """接受选手 slug 或完整 prosettings 选手 URL。"""
+    s = (text or "").strip()
+    m = re.search(r"prosettings\.net/players/([^/#\s?]+)", s, re.I)
+    if m:
+        return m.group(1).strip("/")
+    return s.strip().strip("/")
+
+
+class ProSettingsTab(ttk.Frame):
+    """抓取并展示 prosettings.net 上选手的外设、灵敏度与游戏设置（HTML 解析）。"""
+
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
+        self._fetch_lock = threading.Lock()
+        self._busy = False
+        self._last_data = None
+        self._last_slug = ""
+        self._build_ui()
+
+    def _build_ui(self):
+        self.configure(style="Dark.TFrame")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
+
+        top = ttk.Frame(self, style="Panel.TFrame")
+        top.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        top.columnconfigure(1, weight=1)
+
+        ttk.Label(top, text="Pro 外设与游戏设置", style="PanelH.TLabel").grid(
+            row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 8)
+        )
+        ttk.Label(top, text="数据来源", style="Meta.TLabel").grid(
+            row=1, column=0, sticky="w", padx=16, pady=4
+        )
+        link = ttk.Label(
+            top,
+            text="prosettings.net（浏览即同意其使用条款）",
+            style="Meta.TLabel",
+            cursor="hand2",
+        )
+        link.grid(row=1, column=1, sticky="w", pady=4)
+        link.bind(
+            "<Button-1>",
+            lambda e: webbrowser.open("https://prosettings.net/"),
+        )
+
+        row2 = ttk.Frame(top, style="Panel.TFrame")
+        row2.grid(row=2, column=0, columnspan=3, sticky="ew", padx=16, pady=(4, 12))
+        row2.columnconfigure(1, weight=1)
+
+        ttk.Label(row2, text="选手页面", style="Meta.TLabel").grid(
+            row=0, column=0, sticky="w", padx=(0, 8)
+        )
+        self.slug_var = tk.StringVar(value="s1mple")
+        self.entry = ttk.Entry(row2, textvariable=self.slug_var)
+        self.entry.grid(row=0, column=1, sticky="ew")
+        self.entry.configure(width=48)
+        self.btn_fetch = ttk.Button(
+            row2, text="获取", command=self._on_fetch, style="Accent.TButton"
+        )
+        self.btn_fetch.grid(row=0, column=2, sticky="e", padx=(8, 0))
+
+        note = ttk.Frame(self, style="Dark.TFrame")
+        note.grid(row=1, column=0, sticky="ew", pady=(0, 8))
+        ttk.Label(
+            note,
+            text="可填英文名（如 s1mple）或粘贴完整选手页链接。仅桌面版可直连网站；网页工具箱因浏览器跨域限制请使用本标签或打开原站。",
+            style="Note.TLabel",
+            wraplength=900,
+            justify="left",
+        ).pack(anchor="w", padx=4)
+
+        text_frame = ttk.Frame(self, style="Panel.TFrame")
+        text_frame.grid(row=2, column=0, sticky="nsew")
+        text_frame.rowconfigure(0, weight=1)
+        text_frame.columnconfigure(0, weight=1)
+
+        self.text = scrolledtext.ScrolledText(
+            text_frame,
+            width=80,
+            height=22,
+            bg="#06090e",
+            fg=TEXT,
+            insertbackground=LIME,
+            highlightthickness=1,
+            highlightbackground=LINE_HEX,
+            font=("Consolas", 10),
+            wrap=tk.WORD,
+        )
+        self.text.grid(row=0, column=0, sticky="nsew", padx=12, pady=(12, 8))
+
+        bot = ttk.Frame(text_frame, style="Panel.TFrame")
+        bot.grid(row=1, column=0, sticky="ew", padx=12, pady=(0, 12))
+        bot.columnconfigure(2, weight=1)
+        ttk.Button(
+            bot, text="复制全文", command=self._copy_all, style="Ghost.TButton"
+        ).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(
+            bot, text="在浏览器打开原页", command=self._open_page, style="Ghost.TButton"
+        ).pack(side=tk.LEFT)
+
+    def _set_busy(self, busy):
+        self._busy = busy
+        self.btn_fetch.config(state="disabled" if busy else "normal")
+
+    def _on_fetch(self):
+        if not self._fetch_lock.acquire(blocking=False):
+            return
+        slug = _normalize_prosettings_slug(self.slug_var.get())
+        if not slug:
+            self._fetch_lock.release()
+            self.app.toast("请输入选手 ID 或链接")
+            return
+        self.slug_var.set(slug)
+        self._set_busy(True)
+        self.text.delete("1.0", tk.END)
+        self.text.insert(tk.END, "正在从 prosettings.net 获取…\n")
+
+        def work():
+            try:
+                data = psn.fetch_and_parse(slug)
+                self._last_data = data
+                self._last_slug = slug
+                txt = psn.format_summary_text(data)
+                self.after(0, lambda: self._apply_result(txt, None))
+            except Exception as e:
+                self.after(0, lambda: self._apply_result(None, str(e)))
+            finally:
+                self.after(0, lambda: (self._set_busy(False), self._fetch_lock.release()))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _apply_result(self, text_ok, err):
+        self.text.delete("1.0", tk.END)
+        if err:
+            self.text.insert(tk.END, "获取失败：\n" + err + "\n")
+            self.app.toast("获取失败，请检查网络或选手 ID")
+        else:
+            self.text.insert(tk.END, text_ok)
+            self.app.toast("已加载选手设置")
+
+    def _copy_all(self):
+        content = self.text.get("1.0", tk.END).strip()
+        if not content or content.startswith("正在从"):
+            self.app.toast("没有可复制的文本")
+            return
+        self.app.clipboard_clear()
+        self.app.clipboard_append(content)
+        self.app.toast("已复制到剪贴板")
+
+    def _open_page(self):
+        slug = _normalize_prosettings_slug(self.slug_var.get())
+        if not slug:
+            self.app.toast("请先输入选手 ID")
+            return
+        webbrowser.open(f"https://prosettings.net/players/{slug}/")
+
+
 # ---------------------------------------------------------------- 主程序
 class MAGLabApp(tk.Tk):
     def __init__(self):
@@ -940,9 +1107,11 @@ class MAGLabApp(tk.Tk):
         self.tab_sensor = SensorTab(self.nb, self)
         self.tab_opt = OptimizerTab(self.nb, self)
         self.tab_kb = KeyboardTab(self.nb, self)
+        self.tab_pro = ProSettingsTab(self.nb, self)
         self.nb.add(self.tab_sensor, text="鼠标传感器角度")
         self.nb.add(self.tab_opt, text="CS2 运算延迟优化")
         self.nb.add(self.tab_kb, text="磁轴急停实验室")
+        self.nb.add(self.tab_pro, text="Pro 外设/设置")
 
     def _build_statusbar(self):
         bar = ttk.Frame(self, style="Panel.TFrame")
