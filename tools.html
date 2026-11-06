@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MAGLAB 磁轴工具箱 · 集成 CS2 急停实验室、鼠标传感器旋转角度检测、CS2 电脑运算延迟优化">
+  <title>MAGLAB 磁轴工具箱 · CS2 辅助工具集</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tools.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar pro-topbar">
+    <a class="brand" href="#" data-screen="home" aria-label="返回工具箱首页">
+      <span class="brand-mark">M</span>
+      <span class="brand-text">MAGLAB<small>TOOLBOX · 磁轴工具箱</small></span>
+    </a>
+    <div class="pro-top-center">
+      <span class="pro-badge">CS2 · HALL-EFFECT · MOUSE · SYSTEM</span>
+      <span class="pro-top-config" id="topConfigLabel">工具箱首页</span>
+    </div>
+    <div class="top-actions">
+      <a href="index.html" class="icon-btn" target="_blank" rel="noopener">急停实验室</a>
+      <button class="icon-btn" id="resetBtn" type="button">清空</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen is-active" id="screen-home">
+      <div class="pro-hero">
+        <div class="pro-hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> MAGLAB TOOLBOX</div>
+          <h1>磁轴设置 ·<br><span class="text-lime">CS2 辅助工具箱</span></h1>
+          <p class="lead">
+            把已有的磁轴急停实验室与鼠标传感器角度检测、CS2 电脑运算延迟优化融入同一工具箱。
+            所有计算在本机完成，不上传任何数据。
+          </p>
+          <div class="pro-stats">
+            <div><b>3</b><span>工具模块</span></div>
+            <div><b>本地</b><span>仅本机运行</span></div>
+            <div><b>Win</b><span>Windows 桌面</span></div>
+          </div>
+          <button class="btn btn-primary pro-hero-cta" id="heroStartBtn" type="button">进入工具箱 <span class="btn-arrow">→</span></button>
+        </div>
+
+        <div class="pro-hero-art" aria-hidden="true">
+          <div class="art-frame">
+            <div class="art-top"><span>HALL-EFFECT</span><span>SENSOR · SYSTEM</span></div>
+            <svg viewBox="0 0 560 260" role="img" aria-label="工具箱架构示意">
+              <defs>
+                <linearGradient id="toolGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#48dfff"/>
+                  <stop offset="100%" stop-color="#d7ff3f"/>
+                </linearGradient>
+              </defs>
+              <rect x="30" y="40" width="140" height="160" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+              <rect x="210" y="40" width="140" height="160" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+              <rect x="390" y="40" width="140" height="160" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)"/>
+              <circle cx="100" cy="100" r="26" fill="none" stroke="url(#toolGrad)" stroke-width="3"/>
+              <circle cx="280" cy="120" r="26" fill="none" stroke="url(#toolGrad)" stroke-width="3"/>
+              <circle cx="460" cy="140" r="26" fill="none" stroke="url(#toolGrad)" stroke-width="3"/>
+              <text x="46" y="80" fill="#8b98aa" font-family="monospace" font-size="10">磁轴</text>
+              <text x="46" y="94" fill="#8b98aa" font-family="monospace" font-size="10">急停实验室</text>
+              <text x="226" y="100" fill="#8b98aa" font-family="monospace" font-size="10">鼠标传感器</text>
+              <text x="226" y="114" fill="#8b98aa" font-family="monospace" font-size="10">旋转角度</text>
+              <text x="406" y="120" fill="#8b98aa" font-family="monospace" font-size="10">CS2 运算</text>
+              <text x="406" y="134" fill="#8b98aa" font-family="monospace" font-size="10">延迟优化</text>
+              <line x1="126" y1="100" x2="254" y2="120" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+              <line x1="306" y1="120" x2="364" y2="140" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#d7ff3f"/>
+                </marker>
+              </defs>
+            </svg>
+            <div class="art-caption">
+              <span>模块一 · 磁轴急停</span><span>模块二 · 传感器角度</span><span>模块三 · 运算延迟优化</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="panel tool-card" id="card-kb">
+          <div class="panel-head">
+            <h3>模块一 · 磁轴设置 / 急停实验室</h3><span>MAGLAB PRO</span>
+          </div>
+          <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:16px">
+            基于 Source 移动物理的 CS2 急停测试。重建速度曲线、34% 精度带、开枪时机、反键过冲与 A/B 参数对比。
+            适用于磁轴键盘用户进行触发行程、死区、RT 参数的受控测试与对比。
+          </p>
+          <div class="tool-meta">
+            <span class="tag">键盘 · 磁轴</span>
+            <span class="tag">本地物理模拟</span>
+            <span class="tag">A/B 对比</span>
+          </div>
+          <div class="tool-actions">
+            <a href="index.html" class="btn btn-primary" target="_blank" rel="noopener">打开急停实验室 →</a>
+            <button class="btn btn-ghost btn-sm" id="aboutKb" type="button">关于</button>
+          </div>
+        </div>
+
+        <div class="panel tool-card" id="card-sensor">
+          <div class="panel-head">
+            <h3>模块二 · 鼠标传感器旋转角度</h3><span>SENSOR ANGLE</span>
+          </div>
+          <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:16px">
+            用于确定部分鼠标传感器的旋转偏移角度。以固定方向（建议水平）来回滑动鼠标，
+            工具拟合轨迹直线并给出推荐旋转角度，填入 Razer Synapse / Cooler Master 等驱动即可抵消偏移。
+          </p>
+          <div class="tool-meta">
+            <span class="tag">鼠标 · 光学传感器</span>
+            <span class="tag">轨迹拟合</span>
+            <span class="tag">角度补偿</span>
+          </div>
+          <div class="tool-actions">
+            <a href="sensor.html" class="btn btn-primary">打开角度检测 →</a>
+            <button class="btn btn-ghost btn-sm" id="aboutSensor" type="button">使用说明</button>
+          </div>
+        </div>
+
+        <div class="panel tool-card" id="card-optimizer">
+          <div class="panel-head">
+            <h3>模块三 · CS2 电脑运算延迟优化</h3><span>SYSTEM OPTIMIZER</span>
+          </div>
+          <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:16px">
+            针对 CS2 右上角帧数左侧显示的【最高 ~ 毫秒】（CPU 帧耗时 / frametime）进行电脑自动优化。
+            生成 Windows 一键优化脚本（电源计划、游戏模式、GPU 调度、CS2 启动参数等），以降低运算延迟。
+          </p>
+          <div class="tool-meta">
+            <span class="tag">Windows · 系统优化</span>
+            <span class="tag">一键脚本</span>
+            <span class="tag">CS2 启动参数</span>
+          </div>
+          <div class="tool-actions">
+            <a href="optimizer.html" class="btn btn-primary">打开延迟优化 →</a>
+            <button class="btn btn-ghost btn-sm" id="aboutOpt" type="button">使用说明</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="pro-section">
+        <div class="section-head">
+          <div class="kicker">ABOUT TOOLBOX</div>
+          <h2>三个模块如何配合使用</h2>
+          <p>建议流程：先用「模块一」确定磁轴参数基准 → 用「模块二」校准鼠标传感器角度，保证水平/竖直滑动不偏移 → 用「模块三」优化系统，降低 CS2 右上角帧数左侧的毫秒数，缩短电脑运算延迟。</p>
+        </div>
+        <div class="method-grid">
+          <article class="method-card">
+            <span>STEP 1</span>
+            <h3>磁轴参数基准</h3>
+            <p>在急停实验室完成 20 次盲测，记录触发行程、RT 按下/抬起、精度带命中率作为 A/B 基准。</p>
+          </article>
+          <article class="method-card">
+            <span>STEP 2</span>
+            <h3>传感器角度校准</h3>
+            <p>在平板/鼠标垫上水平来回滑动 10 次以上，读取推荐角度，写入鼠标驱动，消除轨迹旋转偏移。</p>
+          </article>
+          <article class="method-card">
+            <span>STEP 3</span>
+            <h3>运算延迟优化</h3>
+            <p>运行系统优化工具生成脚本并以管理员身份执行，再启动 CS2 观察右上角帧数左侧毫秒数是否下降。</p>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer pro-footer">
+    <div>MAGLAB 磁轴工具箱 · CS2 辅助工具集</div>
+    <div>本地运行 · 不读取游戏内存 · 不上传数据 · 最终请以游戏内实战手感为准</div>
+    <div><a href="index.html">MAGLAB PRO 急停实验室 →</a> &nbsp;|&nbsp; <a href="sensor.html">鼠标传感器角度 →</a> &nbsp;|&nbsp; <a href="optimizer.html">CS2 运算延迟优化 →</a></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="tools.js?v=1.0"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# 系统文件
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 临时 / 备份文件
+*.tmp
+*.bak
+*.log
+maglab_opt_backup.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+build/
+dist/
+*.spec
+
+# 编辑器 / IDE
+.vscode/
+.idea/
+
+# Node（如未来引入）
+node_modules/

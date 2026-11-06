@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MAGLAB 磁轴调校实验室：通过静置、连点、急停、悬停测试，生成适合你操作习惯的磁轴参数。">
+  <title>MAGLAB BASIC · 磁轴习惯测试</title>
+  <link rel="stylesheet" href="basic.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" data-go="home" aria-label="返回首页">
+      <span class="brand-mark">M</span>
+      <span class="brand-text">MAGLAB<small>磁轴调校实验室</small></span>
+    </a>
+
+    <nav class="stepper" id="stepper" aria-label="测试步骤">
+      <button class="step" data-step="profile" title="基础信息"><span class="step-num">01</span><span class="step-label">基础</span></button>
+      <button class="step" data-step="rest" title="静置测试"><span class="step-num">02</span><span class="step-label">静置</span></button>
+      <button class="step" data-step="tap" title="连点测试"><span class="step-num">03</span><span class="step-label">连点</span></button>
+      <button class="step" data-step="strafe" title="急停测试"><span class="step-num">04</span><span class="step-label">急停</span></button>
+      <button class="step" data-step="hold" title="悬停测试"><span class="step-num">05</span><span class="step-label">悬停</span></button>
+      <button class="step" data-step="result" title="调校方案"><span class="step-num">06</span><span class="step-label">方案</span></button>
+    </nav>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="soundToggle" title="开启 / 关闭提示音">声音 开</button>
+      <button class="icon-btn" id="resetBtn" title="清空所有测试数据">重置</button>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+  </header>
+
+  <main>
+    <div class="legacy-banner">
+      这是基础习惯测试版（静置 / 连点 / 悬停 + 旧版 A/D 时序）。旧版 A/D 时序不是 CS 速度急停；CS2 急停请使用
+      <a href="index.html">MAGLAB PRO · Counter-Strafe Lab →</a>
+    </div>
+    <!-- ============ HOME ============ -->
+    <section class="screen is-active" id="screen-home">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> CS2 · HALL EFFECT TUNING</div>
+          <h1>你的手，<br><span class="text-lime">才是最好的参数。</span></h1>
+          <p class="lead">
+            触发行程、上下死区、RT 灵敏度……别人的「神设置」不一定是你的。
+            用 4 项针对性测试读出你的急停习惯，生成一套真正属于你的磁轴参数。
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-go="profile">开始校准 <span class="btn-arrow">→</span></button>
+            <a class="btn btn-ghost" href="#how">它是怎么工作的</a>
+          </div>
+          <button class="demo-link" id="demoBtn" type="button">还没有数据？先看一份示例报告 →</button>
+          <button class="demo-link hidden" id="resumeBtn" type="button">继续上次报告 →</button>
+          <div class="hero-meta">
+            <div><b>4</b><span>项行为测试</span></div>
+            <div><b>≈3</b><span>分钟完成</span></div>
+            <div><b>100%</b><span>本地运行</span></div>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="visual-frame">
+            <div class="frame-top">
+              <span>LIVE PROFILE</span>
+              <span class="live-tag"><i></i> ANALYZING</span>
+            </div>
+            <div class="keyboard" id="heroKeyboard"></div>
+            <div class="visual-readouts">
+              <div class="readout"><span>ACTUATION</span><b>1.50<small>mm</small></b></div>
+              <div class="readout"><span>RT RESET</span><b>0.10<small>mm</small></b></div>
+              <div class="readout"><span>TOP DEADZONE</span><b>0.15<small>mm</small></b></div>
+            </div>
+          </div>
+          <div class="float-chip chip-a">急停干净度 <b>86</b></div>
+          <div class="float-chip chip-b">误触风险 <b class="text-cyan">低</b></div>
+        </div>
+      </div>
+
+      <section class="home-section" id="how">
+        <div class="section-head">
+          <div class="kicker">WHY IT MATTERS</div>
+          <h2>三个参数，<span class="text-lime">三种性格。</span></h2>
+          <p>磁轴不是越灵敏越好。真正适合你的设置，取决于你怎么按、怎么松、怎么急停。</p>
+        </div>
+        <div class="info-grid">
+          <article class="info-card">
+            <div class="info-num">01 / ACTUATION</div>
+            <h3>触发行程</h3>
+            <p>按得浅，响应快，但容易误触；按得深，稳，但急停会慢半拍。它要和你的按压深度匹配。</p>
+            <div class="info-tag">轻点型 → 1.2–1.5mm</div>
+          </article>
+          <article class="info-card">
+            <div class="info-num">02 / DEADZONES</div>
+            <h3>顶部 / 底部死区</h3>
+            <p>顶部死区挡住静置抖动，底部死区吸收按到底的过冲。它们决定你真正可用的有效行程。</p>
+            <div class="info-tag">手重 / 容易误触 → 加大</div>
+          </article>
+          <article class="info-card">
+            <div class="info-num">03 / RAPID TRIGGER</div>
+            <h3>RT 快速触发</h3>
+            <p>抬起多少毫米复位、按下多少毫米重触发。太灵敏会抖断，太迟钝会拖键，必须跟着你的释放控制走。</p>
+            <div class="info-tag">控制稳 → 0.08–0.12mm</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-section">
+        <div class="section-head">
+          <div class="kicker">HOW IT WORKS</div>
+          <h2>不猜，<span class="text-lime">直接测。</span></h2>
+        </div>
+        <div class="process-grid">
+          <div class="process-step"><span>01</span><h3>基础画像</h3><p>键程、当前参数、按压风格与误触频率。</p></div>
+          <div class="process-step"><span>02</span><h3>行为采样</h3><p>静置误触、极限连点、12 次急停、15 秒悬停。</p></div>
+          <div class="process-step"><span>03</span><h3>生成方案</h3><p>三档参数、推荐值、以及每项参数的理由。</p></div>
+          <div class="process-step"><span>04</span><h3>实战回测</h3><p>写入键盘后再测一次急停，对比前后变化。</p></div>
+        </div>
+      </section>
+
+      <section class="home-cta">
+        <div>
+          <div class="kicker">READY WHEN YOU ARE</div>
+          <h2>别人的答案，<br>不如你自己的数据。</h2>
+        </div>
+        <button class="btn btn-primary btn-lg" data-go="profile">开始 3 分钟校准 <span class="btn-arrow">→</span></button>
+      </section>
+    </section>
+
+    <!-- ============ PROFILE ============ -->
+    <section class="screen" id="screen-profile">
+      <div class="screen-head">
+        <div class="kicker">STEP 01 / 基础信息</div>
+        <h2>先告诉我，<span class="text-lime">你的键盘和手感。</span></h2>
+        <p>这些信息决定推荐值的边界。没有标准答案，按你现在的真实状态选。</p>
+      </div>
+
+      <div class="profile-layout">
+        <div class="form-card">
+          <div class="field">
+            <div class="field-head">
+              <label>键盘总键程</label>
+              <span class="field-help">大多数磁轴为 3.4mm，Wooting 等为 4.0mm</span>
+            </div>
+            <div class="chips" data-choice="totalTravel">
+              <button type="button" data-value="3.4">3.4 mm</button>
+              <button type="button" data-value="3.6">3.6 mm</button>
+              <button type="button" data-value="4.0">4.0 mm</button>
+              <button type="button" data-value="custom">自定义</button>
+            </div>
+            <div class="custom-row hidden" id="customTravelRow">
+              <input type="number" id="customTravel" min="2.5" max="4.5" step="0.05" value="3.4" inputmode="decimal" aria-label="自定义键盘总键程（毫米）">
+              <span>mm</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>当前触发行程</label>
+              <span class="field-help">驱动里显示的值，用来做前后对比</span>
+            </div>
+            <div class="range-row">
+              <input type="range" id="currentActuation" min="0.1" max="3.4" step="0.05" value="2.0" aria-label="当前触发行程">
+              <output id="currentActuationOut">2.00 <small>mm</small></output>
+            </div>
+            <div class="range-scale"><span>0.1</span><span>更快</span><span>更稳</span><span id="travelMax">3.4</span></div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>当前 RT 状态</label>
+              <span class="field-help">Rapid Trigger / 快速触发</span>
+            </div>
+            <div class="switch-row">
+              <button class="switch" id="rtToggle" type="button" role="switch" aria-checked="false" aria-label="开启或关闭 Rapid Trigger"><span></span></button>
+              <div class="switch-copy"><b id="rtToggleLabel">未开启</b><small>开启后，抬起一点就会复位</small></div>
+            </div>
+            <div class="custom-row hidden" id="currentRtRow">
+              <span class="mini-label">当前灵敏度</span>
+              <input type="range" id="currentRt" min="0.05" max="0.30" step="0.01" value="0.15" aria-label="当前 RT 灵敏度">
+              <output id="currentRtOut">0.15 mm</output>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>你平时的按键风格</label>
+              <span class="field-help">选最接近的，不用纠结</span>
+            </div>
+            <div class="style-grid" data-choice="pressStyle">
+              <button class="style-card" type="button" data-value="light">
+                <span class="style-icon">◌</span><b>轻点悬停</b>
+                <small>按键刚好过触发点，靠微松手复位</small>
+              </button>
+              <button class="style-card" type="button" data-value="balanced">
+                <span class="style-icon">◐</span><b>均衡</b>
+                <small>有时轻点，有时按实，看情况</small>
+              </button>
+              <button class="style-card" type="button" data-value="heavy">
+                <span class="style-icon">●</span><b>习惯到底</b>
+                <small>每次都要按到底，手指才觉得踏实</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="switch-row compact">
+            <button class="switch" id="fingersToggle" type="button" role="switch" aria-checked="true" aria-label="手指平时是否搭在 WASD 上"><span></span></button>
+            <div class="switch-copy"><b>手指平时搭在 WASD 上</b><small>等回合、看信息时也不抬起</small></div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>你有多容易误触？</label>
+              <span class="field-help">打字、架枪时不小心触发</span>
+            </div>
+            <div class="scale" data-choice="misTouch">
+              <button type="button" data-value="1">从不</button>
+              <button type="button" data-value="2">偶尔</button>
+              <button type="button" data-value="3">有时</button>
+              <button type="button" data-value="4">经常</button>
+              <button type="button" data-value="5">很频繁</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>你的主要打法</label>
+              <span class="field-help">影响速度与稳定性的权重</span>
+            </div>
+            <div class="chips" data-choice="playstyle">
+              <button type="button" data-value="entry">突破手</button>
+              <button type="button" data-value="rifler">步枪手</button>
+              <button type="button" data-value="awper">狙击手</button>
+              <button type="button" data-value="igl">指挥 / 辅助</button>
+              <button type="button" data-value="casual">休闲</button>
+            </div>
+          </div>
+
+          <div class="field field-last">
+            <div class="field-head">
+              <label>这次最想解决什么？</label>
+              <span class="field-help">可多选</span>
+            </div>
+            <div class="chips" data-choice="goals">
+              <button type="button" data-value="speed">急停更快</button>
+              <button type="button" data-value="safe">减少误触</button>
+              <button type="button" data-value="stable">连点更稳</button>
+              <button type="button" data-value="balance">全面平衡</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="summary-card">
+          <div class="summary-kicker">CURRENT PROFILE</div>
+          <div class="summary-row"><span>总键程</span><b id="sumTravel">3.40 mm</b></div>
+          <div class="summary-row"><span>触发行程</span><b id="sumActuation">2.00 mm</b></div>
+          <div class="summary-row"><span>RT</span><b id="sumRt">未开启</b></div>
+          <div class="summary-row"><span>按键风格</span><b id="sumStyle">均衡</b></div>
+          <div class="summary-divider"></div>
+          <p class="summary-note">接下来 4 项测试约 3 分钟。请用你平时打 CS 的坐姿、手位和力度完成，不要刻意改变习惯。</p>
+          <div class="summary-tip"><span>提示</span>测试时请关闭输入法。本工具通过时序与习惯推断参数区间，不读取轴体模拟量。</div>
+        </aside>
+      </div>
+
+      <div class="screen-actions">
+        <button class="btn btn-ghost" data-go="home">← 返回首页</button>
+        <button class="btn btn-primary" id="profileNext">下一步：静置测试 →</button>
+      </div>
+    </section>
+
+    <!-- ============ REST ============ -->
+    <section class="screen test-screen" id="screen-rest">
+      <div class="screen-head compact">
+        <button class="back-link" data-go="profile">← 返回修改基础信息</button>
+        <div class="kicker">STEP 02 / 静置测试</div>
+        <h2>让手指自然放上来。</h2>
+        <p>20 秒内保持平时等回合、看信息时的姿势。不要刻意抬手指，也不要用力按。</p>
+      </div>
+
+      <div class="test-layout">
+        <div class="stage" id="restStage">
+          <div class="stage-top">
+            <span class="stage-label">REST / 20 SEC</span>
+            <span class="timer" id="restTimer">00:20</span>
+          </div>
+          <div class="rest-orb" id="restOrb">
+            <div class="orb-ring"></div>
+            <div class="orb-core"><span id="restState">准备</span></div>
+          </div>
+          <div class="key-monitor" id="restKeys">
+            <div class="mini-key" data-code="KeyW">W</div>
+            <div class="mini-key" data-code="KeyA">A</div>
+            <div class="mini-key" data-code="KeyS">S</div>
+            <div class="mini-key" data-code="KeyD">D</div>
+            <div class="mini-key wide" data-code="Space">SPACE</div>
+            <div class="mini-key wide" data-code="ShiftLeft">SHIFT</div>
+          </div>
+          <div class="stage-hint" id="restHint">点击下方按钮开始，然后把双手放回键盘，像平时一样。</div>
+          <div class="cue-flash" id="restFlash"></div>
+        </div>
+
+        <aside class="side-panel">
+          <h3>这项在测什么</h3>
+          <p>用你当前的设置静置 20 秒。如果手指的自然重量就会触发按键，说明顶部死区或触发行程偏低。</p>
+          <div class="stat-box"><span>误触计数</span><b id="restCount">0</b></div>
+          <div class="stat-box"><span>记录到的按键</span><b id="restKeysHit">—</b></div>
+          <div class="check-list">
+            <div><i>01</i> 手腕放松，手肘有支撑</div>
+            <div><i>02</i> 不要盯着屏幕上的按键</div>
+            <div><i>03</i> 不要为了「通过测试」刻意抬手指</div>
+          </div>
+          <div class="reading-card">
+            <span>READ WHILE WAITING</span>
+            <p>急停不是狂按反方向键，而是先干净地松开当前方向。磁轴的 RT 只是把这个「松开」读得更早。</p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="screen-actions">
+        <button class="btn btn-ghost" id="restSkip">跳过此项</button>
+        <button class="btn btn-primary" id="restStart">开始 20 秒测试</button>
+        <button class="btn btn-primary hidden" id="restNext" data-go="tap">下一项：连点 →</button>
+      </div>
+    </section>
+
+    <!-- ============ TAP ============ -->
+    <section class="screen test-screen" id="screen-tap">
+      <div class="screen-head compact">
+        <button class="back-link" data-go="rest">← 返回静置</button>
+        <div class="kicker">STEP 03 / 连点测试</div>
+        <h2>你的释放，有多快？</h2>
+        <p>用 D 键以最快但可控的频率连续点按 8 秒。抬起不必完全离键，按你平时的手感来。</p>
+      </div>
+
+      <div class="test-layout">
+        <div class="stage tap-stage">
+          <div class="stage-top">
+            <span class="stage-label">RAPID TAP / 8 SEC</span>
+            <span class="timer" id="tapTimer">8.0s</span>
+          </div>
+          <div class="tap-main">
+            <div class="big-key" id="tapKey"><span>D</span><small>RAPID TAP</small></div>
+            <div class="tap-readout">
+              <div class="live-number"><b id="tapLiveTps">0.0</b><span>次 / 秒</span></div>
+              <div class="tap-bars" id="tapBars"></div>
+              <div class="tap-live-sub"><span id="tapLiveCount">0 次</span><span id="tapLiveHint">等待开始</span></div>
+            </div>
+          </div>
+          <div class="stage-hint" id="tapHint">手指放松。点按的深度和节奏，按你打 CS 时最自然的来。</div>
+        </div>
+
+        <aside class="side-panel">
+          <h3>这项在测什么</h3>
+          <p>连点频率和节奏波动，能反映你对「松手—复位—再按」的控制能力。控制越稳，RT 可以越灵敏。</p>
+          <div class="stat-box"><span>剩余时间</span><b id="tapSideTimer">8.0s</b></div>
+          <div class="stat-box"><span>最短间隔</span><b id="tapMinInterval">—</b></div>
+          <div class="stat-box"><span>平均按住</span><b id="tapHoldLive">—</b></div>
+          <div class="check-list">
+            <div><i>01</i> 只按 D，不要用其他键</div>
+            <div><i>02</i> 不要为了数字刻意抖手</div>
+            <div><i>03</i> 出现一次极短间隔，可能是手抖，不一定是轴的问题</div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="test-summary hidden" id="tapSummary">
+        <div class="summary-stat"><span>连点次数</span><b id="tapSumCount">0</b><small>次</small></div>
+        <div class="summary-stat"><span>平均频率</span><b id="tapSumTps">0.0</b><small>次/秒</small></div>
+        <div class="summary-stat"><span>节奏波动</span><b id="tapSumCv">0</b><small>%</small></div>
+        <div class="summary-stat"><span>平均按住</span><b id="tapSumHold">0</b><small>ms</small></div>
+        <div class="summary-stat"><span>抖动间隔</span><b id="tapSumBounce">0</b><small>次</small></div>
+      </div>
+
+      <div class="screen-actions">
+        <button class="btn btn-ghost" data-go="rest">← 上一步</button>
+        <button class="btn btn-primary" id="tapStart">开始 8 秒测试</button>
+        <button class="btn btn-primary hidden" id="tapNext" data-go="strafe">下一项：急停 →</button>
+      </div>
+    </section>
+
+    <!-- ============ STRAFE ============ -->
+    <section class="screen test-screen" id="screen-strafe">
+      <div class="screen-head compact">
+        <button class="back-link" data-go="tap">← 返回连点</button>
+        <div class="kicker">STEP 04 / 旧版 A/D 时序</div>
+        <h2>12 次切换，<span class="text-lime">只看按键时序。</span></h2>
+        <p>注意：这一项只记录 keyup/keydown，不模拟 CS2 速度、精度带或开枪，不是真正的急停测试。完整急停请使用 <a class="text-lime" href="index.html">MAGLAB PRO →</a></p>
+        <p>按住 A 向左移动。提示出现时，立刻松开 A、按下 D。然后保持 D，等下一次提示切回 A。</p>
+      </div>
+
+      <div class="test-layout">
+        <div class="stage strafe-stage" id="strafeStage">
+          <div class="stage-top">
+            <span class="stage-label">COUNTER-STRAFE / 12 SWITCHES</span>
+            <span class="timer" id="strafeTimer">--</span>
+          </div>
+          <div class="strafe-hud">
+            <div class="hud-item"><span>干净切换</span><b id="strafeCleanHud">0 / 0</b></div>
+            <div class="hud-item"><span>上次反应</span><b id="strafeReactionHud">-- ms</b></div>
+            <div class="hud-item"><span>上次时序</span><b id="strafeSignedHud">--</b></div>
+          </div>
+          <div class="lane" id="strafeLane">
+            <div class="lane-zone left"><span>A</span></div>
+            <div class="lane-zone right"><span>D</span></div>
+            <div class="lane-center"></div>
+            <div class="lane-marker" id="laneMarker"></div>
+            <div class="lane-cue" id="laneCue"></div>
+          </div>
+          <div class="strafe-keys">
+            <div class="big-key small" id="keyA"><span>A</span><small>LEFT</small></div>
+            <div class="cue-orb" id="strafeCue"><span>READY</span></div>
+            <div class="big-key small" id="keyD"><span>D</span><small>RIGHT</small></div>
+          </div>
+          <div class="stage-hint" id="strafeHint">点击开始，然后按住 A。</div>
+          <div class="cue-flash" id="strafeFlash"></div>
+          <div class="stage-overlay" id="strafeOverlay">
+            <div class="overlay-card">
+              <div class="overlay-kicker" id="strafeOverlayKicker">COUNTER-STRAFE</div>
+              <h3 id="strafeOverlayTitle">准备好急停了吗？</h3>
+              <p id="strafeOverlayText">开始后按住 A。提示出现时，立即松开 A 并按下 D。保持 D，等下一次提示。</p>
+              <button class="btn btn-primary" id="strafeStartBtn">开始测试</button>
+              <button class="btn btn-ghost hidden" id="strafeAgainBtn">再测一次</button>
+              <button class="btn btn-primary hidden" id="strafeDoneBtn">下一项：悬停 →</button>
+            </div>
+          </div>
+          <div class="progress-dots" id="strafeDots"></div>
+        </div>
+
+        <aside class="side-panel">
+          <h3>这项在测什么</h3>
+          <p>切换时「旧键松开」和「新键按下」的时间差。先松后按会产生空档，先按后松会产生双键重叠，两者都会让急停变脏。</p>
+          <div class="stat-box"><span>干净切换</span><b id="strafeCleanSide">0 / 0</b></div>
+          <div class="stat-box"><span>重叠率</span><b id="strafeOverlapSide">—</b></div>
+          <div class="stat-box"><span>空档率</span><b id="strafeGapSide">—</b></div>
+          <div class="check-list">
+            <div><i>01</i> 提示出现前，保持当前方向键按住</div>
+            <div><i>02</i> 像平时架枪一样，不要刻意慢动作</div>
+            <div><i>03</i> 鼠标不用点，只测键盘切换</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ HOLD ============ -->
+    <section class="screen test-screen" id="screen-hold">
+      <div class="screen-head compact">
+        <button class="back-link" data-go="strafe">← 返回急停</button>
+        <div class="kicker">STEP 05 / 悬停测试</div>
+        <h2>按住，不要松。</h2>
+        <p>按住 D 15 秒，保持平时架枪、压枪的力度。不要刻意放松，也不要用力砸到底。</p>
+      </div>
+
+      <div class="test-layout">
+        <div class="stage hold-stage" id="holdStage">
+          <div class="stage-top">
+            <span class="stage-label">HOLD STABILITY / 15 SEC</span>
+            <span class="timer" id="holdTimer">15.0s</span>
+          </div>
+          <div class="hold-main">
+            <div class="big-key" id="holdKey"><span>D</span><small>HOLD</small></div>
+            <div class="hold-readout">
+              <div class="live-number"><b id="holdBreaks">0</b><span>次断开</span></div>
+              <div class="stability-strip" id="stabilityStrip"></div>
+              <div class="tap-live-sub"><span id="holdState">等待开始</span><span id="holdStable">稳定时长 —</span></div>
+            </div>
+          </div>
+          <div class="stage-hint" id="holdHint">这项会暴露手抖导致的断触。用你平时架枪的力度按住 D。</div>
+          <div class="cue-flash" id="holdFlash"></div>
+          <div class="stage-overlay" id="holdOverlay">
+            <div class="overlay-card">
+              <div class="overlay-kicker">HOLD STABILITY</div>
+              <h3 id="holdOverlayTitle">准备好悬停了吗？</h3>
+              <p id="holdOverlayText">点击开始，然后按住 D 键 15 秒。中途如果断开，重新按住即可，但会记录一次。</p>
+              <button class="btn btn-primary" id="holdStartBtn">开始测试</button>
+              <button class="btn btn-ghost hidden" id="holdAgainBtn">再测一次</button>
+              <button class="btn btn-primary hidden" id="holdDoneBtn">查看调校方案 →</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-panel">
+          <h3>这项在测什么</h3>
+          <p>架枪时手指会持续压住方向键。如果 RT 过于灵敏，轻微的张力变化就会被读成断触，影响压枪和身位控制。</p>
+          <div class="stat-box"><span>断开次数</span><b id="holdBreakSide">0</b></div>
+          <div class="stat-box"><span>累计断开</span><b id="holdGapSide">0 ms</b></div>
+          <div class="check-list">
+            <div><i>01</i> 用平时架枪的力度，不要刻意轻按</div>
+            <div><i>02</i> 断开后立刻重新按住，不用停</div>
+            <div><i>03</i> 如果你当前 RT 未开启，这项反映的是手部稳定性</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section class="screen result-screen" id="screen-result">
+      <div class="demo-banner hidden" id="demoBanner">
+        <span>DEMO</span>
+        <div>这是示例数据，用于展示报告结构。你的真实报告会根据实测数据生成。</div>
+        <button id="exitDemo" type="button">退出示例</button>
+      </div>
+      <div class="result-head">
+        <div>
+          <div class="kicker">FINAL / 你的调校方案</div>
+          <h2 id="resultName">均衡进化型</h2>
+          <p id="resultSub">正在根据你的测试数据生成参数…</p>
+        </div>
+        <div class="result-badge">
+          <span>CONFIDENCE</span>
+          <b id="resultConfidence" title="根据测试完成度与有效样本数计算">—</b>
+          <small id="resultDate">—</small>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="panel params-panel">
+          <div class="panel-head"><h3>推荐参数</h3><span>先按这组打 3 局</span></div>
+          <div class="param-grid" id="paramGrid"></div>
+          <div class="travel-map" id="travelMap"></div>
+          <div class="param-note" id="paramNote">RT 总开关：开启。所有数值按 0.05mm 取整，按你键盘支持的精度微调。</div>
+        </div>
+
+        <div class="panel radar-panel">
+          <div class="panel-head"><h3>习惯画像</h3><span>0 – 100</span></div>
+          <div id="radarChart"></div>
+          <div class="metric-list" id="metricList"></div>
+        </div>
+      </div>
+
+      <div class="panel profiles-panel">
+        <div class="panel-head"><h3>三档方案</h3><span>先试「推荐」，再按手感微调</span></div>
+        <div class="table-wrap">
+          <table id="profileTable"></table>
+        </div>
+        <p class="table-note">稳健档更防误触，适合手重或刚换磁轴；激进档更跟手，适合释放控制稳定、追求极限急停的玩家。</p>
+      </div>
+
+      <div class="panel insights-panel">
+        <div class="panel-head"><h3>你的习惯读数</h3><span>为什么会得到这些参数</span></div>
+        <div class="insights" id="insights"></div>
+      </div>
+
+      <div class="panel apply-panel">
+        <div class="apply-copy">
+          <div class="kicker">HOW TO APPLY</div>
+          <h3>写进键盘，再回测。</h3>
+          <p>参数只是起点。先按推荐值实战，再以 0.05–0.1mm 为单位微调，一次只改一个参数。</p>
+        </div>
+        <ol class="apply-steps">
+          <li><span>01</span><div><b>先校准满程</b><p>打开键盘驱动，松开所有键，再逐个按到底完成校准。校准不准，死区就没有意义。</p></div></li>
+          <li><span>02</span><div><b>只改游戏键</b><p>优先设置 WASD、空格、Shift、Ctrl。其他键保持保守，避免打字误触。</p></div></li>
+          <li><span>03</span><div><b>实战后再回测</b><p>打 3 局死斗，再点下方「回测急停」。对比前后数据，不要只凭第一手感。</p></div></li>
+        </ol>
+      </div>
+
+      <div class="panel compare-panel hidden" id="comparePanel">
+        <div class="panel-head"><h3>急停回测对比</h3><span id="compareNote">回测只反映一次发挥</span></div>
+        <div class="compare-grid" id="compareGrid"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-ghost" id="resultHome">← 回到首页</button>
+        <div class="action-group">
+          <button class="btn btn-ghost" id="resultRetest">应用后回测急停</button>
+          <button class="btn btn-ghost" id="resultDownload">导出参数</button>
+          <button class="btn btn-ghost" id="resultPrint">打印 / PDF</button>
+          <button class="btn btn-primary" id="resultCopy">复制参数</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>MAGLAB · 磁轴调校实验室</div>
+    <div>本地运行 · 不上传数据 · 不读取轴体模拟量 · 建议使用 Chrome / Edge</div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="basic.js"></script>
+</body>
+</html>

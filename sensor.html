@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"content="鼠标传感器旋转角度检测工具 · 通过轨迹拟合计算传感器旋转偏移，推荐写入驱动的角度">
+  <title>鼠标传感器旋转角度检测 · MAGLAB 工具箱</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tools.css">
+  <link rel="stylesheet" href="sensor.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar pro-topbar">
+    <a class="brand" href="tools.html" aria-label="返回工具箱首页">
+      <span class="brand-mark">M</span>
+      <span class="brand-text">MAGLAB<small>SENSOR ANGLE</small></span>
+    </a>
+    <div class="pro-top-center">
+      <span class="pro-badge">MOUSE · SENSOR · ROTATION</span>
+      <span class="pro-top-config" id="topConfigLabel">传感器角度检测</span>
+    </div>
+    <div class="top-actions">
+      <a href="tools.html" class="icon-btn" target="_blank" rel="noopener">返回工具箱</a>
+      <button class="icon-btn" id="resetBtn" type="button">重置</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen is-active" id="screen-sensor">
+      <div class="sensor-header">
+        <div class="sensor-header-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> 模块二 · 鼠标传感器旋转角度</div>
+          <h1>确定部分鼠标传感器的<br><span class="text-lime">旋转偏移角度</span></h1>
+          <p class="lead">
+            某些鼠标的光学传感器安装方向与鼠标外壳不严格一致，导致屏幕指针移动与你的物理滑动方向有偏移。
+            在画布上以固定方向（建议水平）来回滑动鼠标，工具拟合轨迹直线并计算偏移角度，推荐写入驱动抵消。
+          </p>
+          <div class="sensor-result-row" id="sensorResultRow" style="display:none">
+            <div class="result-badge">
+              <span>推荐驱动角度</span>
+              <b id="recommendAngle">0°</b>
+              <small id="recommendSign">正 = 顺时针 / 负 = 逆时针</small>
+            </div>
+            <div class="result-badge">
+              <span>检测偏移角度</span>
+              <b id="detectAngle">0°</b>
+              <small id="detectUnit">拟合直线相对水平方向</small>
+            </div>
+            <div class="result-badge">
+              <span>拟合优度 R²</span>
+              <b id="fitR2">—</b>
+              <small>越接近 1 越可信</small>
+            </div>
+          </div>
+        </div>
+        <div class="sensor-header-diagram" aria-hidden="true">
+          <svg viewBox="0 0 320 200" class="angle-diagram">
+            <defs>
+              <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#d7ff3f"/>
+              </marker>
+            </defs>
+            <!-- 鼠标轮廓 -->
+            <path d="M80,110 Q100,95 140,95 Q180,95 200,110 Q200,140 160,145 Q120,150 80,140 Q80,125 80,110" fill="#0f1722" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+            <rect x="110" y="100" width="80" height="12" rx="6" fill="rgba(255,255,255,0.06)"/>
+            <!-- 理想水平轨迹 -->
+            <line x1="50" y1="155" x2="270" y2="155" stroke="rgba(255,255,255,0.12)" stroke-dasharray="5 5"/>
+            <text x="45" y="150" fill="#6f7f92" font-family="monospace" font-size="10">理想：水平滑动</text>
+            <!-- 实际偏移轨迹 -->
+            <line x1="50" y1="155" x2="270" y2="125" stroke="#d7ff3f" stroke-width="2.5" marker-end="url(#arr)"/>
+            <text x="240" y="118" fill="#d7ff3f" font-family="monospace" font-size="10" font-weight="700">实际：偏移 θ</text>
+            <!-- 角度弧 -->
+            <path d="M70,155 A30,30 0 0 1 100,142" fill="none" stroke="#ff5268" stroke-width="2"/>
+            <text x="86" y="140" fill="#ff5268" font-family="monospace" font-size="11" font-weight="700">θ</text>
+          </svg>
+          <div class="diagram-caption">传感器安装偏移会导致物理水平滑动在屏幕上出现角度偏差 θ</div>
+        </div>
+      </div>
+
+      <div class="sensor-body">
+        <!-- 左：画布 -->
+        <div class="panel sensor-canvas-panel">
+          <div class="panel-head">
+            <h3>轨迹记录画布</h3>
+            <span class="status-badge" id="statusBadge">就绪</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="sensorCanvas" width="900" height="500"></canvas>
+            <div class="canvas-mask" id="canvasMask"></div>
+          </div>
+          <div class="canvas-hints">
+            <div><span>●</span> 按住鼠标左键在画布上滑动</div>
+            <div><span>●</span> 建议方向：水平左右来回（或垂直上下），保持直线</div>
+            <div><span>●</span> 滑动 10 次以上后松开，点击“停止并计算”</div>
+            <div><span>●</span> 避免急停、打圈或大幅变向，否则拟合角度不准</div>
+          </div>
+        </div>
+
+        <!-- 右：控制面板 -->
+        <div class="panel sensor-control-panel">
+          <div class="panel-head"><h3>控制与结果</h3><span>CALIBRATE</span></div>
+
+          <div class="ctrl-group">
+            <label class="ctrl-label">记录状态</label>
+            <div class="pill" id="statePill">等待开始</div>
+          </div>
+
+          <div class="ctrl-group">
+            <label class="ctrl-label">有效轨迹点</label>
+            <div class="big-num" id="pointCount">0</div>
+            <small>点越多、轨迹越直，角度越准</small>
+          </div>
+
+          <div class="ctrl-group">
+            <label class="ctrl-label">滑动方向判断</label>
+            <div class="pill" id="directionPill">—</div>
+          </div>
+
+          <div class="ctrl-actions">
+            <button class="btn btn-primary btn-lg" id="btnStart" type="button">开始记录</button>
+            <button class="btn btn-ghost btn-lg" id="btnStop" type="button" disabled>停止并计算</button>
+            <button class="btn btn-ghost btn-sm" id="btnReset" type="button">重置</button>
+          </div>
+
+          <div class="divider">推荐写入驱动</div>
+
+          <div class="ctrl-group">
+            <label class="ctrl-label">角度值</label>
+            <div class="angle-display">
+              <b id="angleValue">0</b><span>°</span>
+              <span class="angle-sign" id="angleSignText">正</span>
+            </div>
+            <p class="ctrl-note">将此数值填入鼠标驱动的“传感器旋转 / 角度补偿”项。</p>
+          </div>
+
+          <div class="ctrl-group">
+            <label class="ctrl-label">适用驱动与位置</label>
+            <div class="brand-list">
+              <div class="brand-item">
+                <b>Razer Synapse</b>
+                <small>鼠标 → 标定 / 校准 → 鼠标旋转角度（Mouse Rotation）</small>
+              </div>
+              <div class="brand-item">
+                <b>Cooler Master</b>
+                <small>鼠标设置 → 传感器角度滑块</small>
+              </div>
+              <div class="brand-item">
+                <b>其他品牌</b>
+                <small>查找“Sensor Rotation / Angle / Calibration”项；若无，可在游戏内手感校验后适当调整</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="ctrl-note warn">
+            <b>注意：</b> 各品牌驱动对正负号定义可能相反。建议先填入推荐值，在 CS2 或桌面上做水平长滑，若指针仍偏上/偏下，则将正负号反转后再试。
+          </div>
+
+          <div class="ctrl-actions" style="margin-top:14px">
+            <button class="btn btn-ghost btn-sm" id="btnCopy" type="button">复制角度值</button>
+            <button class="btn btn-ghost btn-sm" id="btnExport" type="button">导出记录文本</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sensor-footer">
+        <p>本工具仅在本机浏览器运行，不上传任何数据。最终请以 CS2 游戏内手感及十字线移动直线度为准。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer pro-footer">
+    <div>MAGLAB 工具箱 · 鼠标传感器旋转角度检测</div>
+    <div>本地运行 · 不读取游戏内存 · 不上传数据</div>
+    <div><a href="tools.html">返回工具箱 →</a> &nbsp;|&nbsp; <a href="optimizer.html">CS2 运算延迟优化 →</a></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="sensor.js?v=1.0"></script>
+</body>
+</html>

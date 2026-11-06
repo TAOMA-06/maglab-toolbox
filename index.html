@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MAGLAB PRO：基于 Source 移动物理的 CS2 急停测试。测量速度曲线、34% 精度带、开枪时机、反键过冲与 A/B 参数对比。">
+  <title>MAGLAB PRO · CS2 急停实验室</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar pro-topbar">
+    <a class="brand" href="#" data-screen="setup" aria-label="返回设置">
+      <span class="brand-mark">M</span>
+      <span class="brand-text">MAGLAB<small>COUNTER-STRAFE LAB</small></span>
+    </a>
+    <div class="pro-top-center">
+      <span class="pro-badge">CS2 · SOURCE MODEL</span>
+      <span class="pro-top-config" id="topConfigLabel">未开始</span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="soundToggle" type="button">声音 开</button>
+      <button class="icon-btn" id="resetBtn" type="button">清空</button>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+  </header>
+
+  <main>
+    <!-- ============================================================
+         SETUP
+    ============================================================ -->
+    <section class="screen is-active" id="screen-setup">
+      <div class="pro-hero">
+        <div class="pro-hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> CS2 · COUNTER-STRAFE PHYSICS</div>
+          <h1>急停不是按键顺序。<br><span class="text-lime">是速度曲线。</span></h1>
+          <p class="lead">
+            A→D 的 keyup/keydown 只能说明你按了什么，说明不了你有没有停下来。
+            MAGLAB PRO 用 Source 移动物理重建你的速度曲线：松键、反键、摩擦、反向加速、开枪时机，全部记录。
+          </p>
+          <div class="pro-stats">
+            <div><b>5.2</b><span>FRICTION</span></div>
+            <div><b>5.5</b><span>ACCELERATE</span></div>
+            <div><b>34%</b><span>ACCURACY BAND</span></div>
+          </div>
+          <div class="pro-hero-note">
+            <span>不是游戏内遥测</span>
+            <p>受控物理模型 + 真实键鼠输入。最终用 Counter-strafe Master / aim_botz 做实战复验。</p>
+          </div>
+          <button class="btn btn-primary pro-hero-cta" id="heroStartBtn" type="button">配置测试 <span class="btn-arrow">→</span></button>
+        </div>
+
+        <div class="pro-hero-art" aria-hidden="true">
+          <div class="art-frame">
+            <div class="art-top"><span>VELOCITY / OLD DIRECTION</span><span>34% BAND</span></div>
+            <svg viewBox="0 0 560 290" role="img" aria-label="速度曲线示意">
+              <defs>
+                <linearGradient id="traceGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#48dfff"/>
+                  <stop offset="100%" stop-color="#d7ff3f"/>
+                </linearGradient>
+              </defs>
+              <rect x="42" y="28" width="486" height="218" rx="10" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.07)"/>
+              <line x1="42" y1="137" x2="528" y2="137" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3 5"/>
+              <rect x="42" y="126" width="486" height="22" fill="rgba(215,255,63,0.06)"/>
+              <line x1="42" y1="126" x2="528" y2="126" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4"/>
+              <line x1="42" y1="148" x2="528" y2="148" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4"/>
+              <text x="50" y="120" fill="#6f7f92" font-family="monospace" font-size="9">+34%</text>
+              <text x="50" y="164" fill="#6f7f92" font-family="monospace" font-size="9">-34%</text>
+              <path d="M62 62 C150 62 178 62 205 70 C250 84 268 120 286 137 C300 151 310 170 324 178"
+                fill="none" stroke="url(#traceGrad)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M324 178 C340 190 352 194 378 194" fill="none" stroke="#ff5268" stroke-width="2.4" stroke-linecap="round"/>
+              <line x1="205" y1="52" x2="205" y2="230" stroke="rgba(72,223,255,.35)" stroke-dasharray="2 4"/>
+              <line x1="286" y1="52" x2="286" y2="230" stroke="rgba(255,182,72,.4)" stroke-dasharray="2 4"/>
+              <line x1="324" y1="52" x2="324" y2="230" stroke="rgba(215,255,63,.5)" stroke-dasharray="2 4"/>
+              <circle cx="205" cy="68" r="4" fill="#48dfff"/>
+              <circle cx="286" cy="137" r="4" fill="#ffb648"/>
+              <circle cx="324" cy="178" r="4" fill="#d7ff3f"/>
+              <text x="195" y="248" fill="#8b98aa" font-family="monospace" font-size="9">RELEASE</text>
+              <text x="270" y="248" fill="#8b98aa" font-family="monospace" font-size="9">COUNTER</text>
+              <text x="315" y="248" fill="#8b98aa" font-family="monospace" font-size="9">SHOT</text>
+              <text x="370" y="248" fill="#ff5268" font-family="monospace" font-size="9">OVERSHOOT</text>
+            </svg>
+            <div class="art-caption">
+              <span>旧方向 +215 u/s</span><span>0</span><span>反方向过冲</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="panel setup-card" id="setupCard">
+          <div class="panel-head">
+            <h3>测试条件</h3>
+            <span id="setupRoleLabel">BASELINE</span>
+          </div>
+
+          <div class="role-row" id="roleRow">
+            <button class="role-chip is-selected" data-role="baseline" type="button">新基准</button>
+            <button class="role-chip" data-role="ab" id="roleABBtn" type="button" disabled>A/B 第二组</button>
+          </div>
+          <div class="ab-lock hidden" id="abLockNote"></div>
+
+          <div class="field">
+            <div class="field-head"><label>武器 / 最大速度</label><span class="field-help">CS2 武器移动速度</span></div>
+            <div class="chips" id="weaponChips">
+              <button type="button" data-weapon="ak47" class="is-selected">AK-47 <small>215</small></button>
+              <button type="button" data-weapon="m4a4">M4A4 <small>225</small></button>
+              <button type="button" data-weapon="awp">AWP <small>200</small></button>
+              <button type="button" data-weapon="ssg08">SSG 08 <small>230</small></button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head"><label>测试次数</label><span class="field-help">左右交替</span></div>
+            <div class="chips" id="repsChips">
+              <button type="button" data-reps="12">12 次 · 快速</button>
+              <button type="button" data-reps="20" class="is-selected">20 次 · 推荐</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head"><label>测试模式</label><span class="field-help">测评模式不显示实时速度</span></div>
+            <div class="chips" id="modeChips">
+              <button type="button" data-mode="blind" class="is-selected">测评 · 盲测</button>
+              <button type="button" data-mode="guided">训练 · 显示速度</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head"><label>比赛模拟</label><span class="field-help">基础测试后追加 8 次</span></div>
+            <div class="hw-switch-row">
+              <button class="switch" id="pressureToggle" type="button" role="switch" aria-checked="true" aria-label="比赛模拟开关"><span></span></button>
+              <span id="pressureLabel">包含 8 次比赛模拟</span>
+            </div>
+            <p class="field-help" style="margin:8px 0 0;text-align:left">目标出现后 900ms 内完成急停 + 开枪。只加时间压力，不加瞄准。</p>
+          </div>
+
+          <div class="field">
+            <div class="field-head"><label>配置标签</label><span class="field-help">用于 A/B 报告</span></div>
+            <input class="text-input" id="configLabel" type="text" maxlength="40" placeholder="例如：1.50mm / RT 0.10">
+          </div>
+
+          <details class="hardware-details">
+            <summary>当前键盘设置与硬件画像 <span>用于报告建议</span></summary>
+            <div class="hardware-grid">
+              <label class="hw-field">触发行程 <input type="number" id="hwActuation" min="0.1" max="4" step="0.05" value="1.50"><small>mm</small></label>
+              <label class="hw-field">顶部死区 <input type="number" id="hwTop" min="0" max="0.5" step="0.05" value="0.15"><small>mm</small></label>
+              <label class="hw-field">底部死区 <input type="number" id="hwBottom" min="0" max="0.6" step="0.05" value="0.30"><small>mm</small></label>
+              <label class="hw-field">RT 按下 <input type="number" id="hwRtPress" min="0.01" max="0.5" step="0.01" value="0.10"><small>mm</small></label>
+              <label class="hw-field">RT 抬起 <input type="number" id="hwRtRelease" min="0.01" max="0.5" step="0.01" value="0.10"><small>mm</small></label>
+              <div class="hw-switch-row">
+                <button class="switch" id="hwRtToggle" type="button" role="switch" aria-checked="true" aria-label="Rapid Trigger 开关"><span></span></button>
+                <span id="hwRtLabel">RT 已开启</span>
+              </div>
+              <div class="hw-switch-row">
+                <button class="switch" id="hwContinuousToggle" type="button" role="switch" aria-checked="true" aria-label="连续 RT 开关"><span></span></button>
+                <span id="hwContinuousLabel">连续 RT 开启</span>
+              </div>
+              <div class="hw-switch-row">
+                <button class="switch" id="hwFingersToggle" type="button" role="switch" aria-checked="true" aria-label="手指是否常搭 WASD"><span></span></button>
+                <span id="hwFingersLabel">手指常搭 WASD</span>
+              </div>
+              <div class="hw-field hw-field-wide">
+                <span>误触频率</span>
+                <div class="scale scale-small" id="hwMisTouch">
+                  <button type="button" data-value="1">从不</button>
+                  <button type="button" data-value="2" class="is-selected">偶尔</button>
+                  <button type="button" data-value="3">有时</button>
+                  <button type="button" data-value="4">经常</button>
+                  <button type="button" data-value="5">频繁</button>
+                </div>
+              </div>
+              <div class="hw-field hw-field-wide">
+                <span>按压风格</span>
+                <div class="chips chips-small" id="hwStyle">
+                  <button type="button" data-value="light">轻点悬停</button>
+                  <button type="button" data-value="balanced" class="is-selected">均衡</button>
+                  <button type="button" data-value="heavy">习惯到底</button>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="setup-actions">
+            <button class="btn btn-primary" id="startRunBtn" type="button">开始 20 次测试 →</button>
+            <button class="btn btn-ghost" id="practiceBtn" type="button">先练习 5 次</button>
+          </div>
+          <p class="setup-note">建议先练习 3–5 次。正式测试全程使用同一把武器、同一套键位；中途不要改设置。</p>
+          <button class="demo-link" id="demoBtn" type="button">查看示例报告 →</button>
+          <div class="baseline-status hidden" id="baselineStatus"></div>
+        </div>
+
+        <aside class="panel protocol-card">
+          <div class="panel-head"><h3>测试协议</h3><span>STANDARD</span></div>
+          <ol class="protocol-list">
+            <li><span>01</span><div><b>按住方向键</b><p>按住 A 或 D，保持到目标出现。测试会在你达到该武器最大速度后才给提示。</p></div></li>
+            <li><span>02</span><div><b>松旧键 + 点按反键</b><p>目标出现后松开旧键，点按反方向键。不要用 Snap Tap；本测试只模拟手动输入。</p></div></li>
+            <li><span>03</span><div><b>速度进精度带再开枪</b><p>速度 ≤ 武器最大速度的 34% 时点击靶区。每次记录开枪速度、停速、反键过冲和时序。</p></div></li>
+          </ol>
+          <div class="protocol-note">20 次 = 左右各 10 次。提前松键、提前开枪、未检测到开枪的组会重试，不计入样本。</div>
+          <div class="protocol-stats">
+            <div><b>1 ms</b><span>物理步长</span></div>
+            <div><b>34%</b><span>精度参考</span></div>
+            <div><b>2×</b><span>A/B 对比</span></div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="pro-section" id="method">
+        <div class="section-head">
+          <div class="kicker">WHY THIS IS DIFFERENT</div>
+          <h2>普通 A/D 测试，<span class="text-lime">测不到急停。</span></h2>
+          <p>急停的核心不是“按了反方向键”，而是速度在什么时间、以什么方式归零，以及你何时开枪。</p>
+        </div>
+        <div class="difference-grid">
+          <article class="difference-card old">
+            <span>普通测试</span>
+            <h3>keyup / keydown</h3>
+            <ul>
+              <li>只记录按键顺序</li>
+              <li>没有速度、摩擦、反向加速</li>
+              <li>没有开枪时刻</li>
+              <li>无法区分早枪、晚枪、过冲</li>
+            </ul>
+          </article>
+          <article class="difference-card new">
+            <span>MAGLAB PRO</span>
+            <h3>速度曲线 + 开枪</h3>
+            <ul>
+              <li>Source 移动物理：摩擦 5.2 / 加速 5.5 / 停速 80</li>
+              <li>34% 精度带 + 完全停止</li>
+              <li>松键→反键间隔、反键时长、过冲</li>
+              <li>A/B 同协议对比，验证设置而不是猜</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="pro-section">
+        <div class="section-head">
+          <div class="kicker">PHYSICS / LIMITS</div>
+          <h2>模型透明，<span class="text-lime">边界清楚。</span></h2>
+        </div>
+        <div class="method-grid">
+          <article class="method-card">
+            <span>MODEL</span>
+            <h3>CS2 默认移动参数</h3>
+            <p>sv_friction 5.2 · sv_accelerate 5.5 · sv_stopspeed 80。武器最大速度按 AK-47 / M4A4 / AWP / SSG 08 预设。</p>
+          </article>
+          <article class="method-card">
+            <span>RESOLUTION</span>
+            <h3>1 ms 物理步长</h3>
+            <p>用 1 ms 步长近似 CS2 sub-tick 的输入应用。真实服务器 tick、网络延迟、丢包不在模型中。</p>
+          </article>
+          <article class="method-card">
+            <span>VALIDATION</span>
+            <h3>最终在游戏里复验</h3>
+            <p>用 Counter-strafe Master（Workshop 3667395967）或 aim_botz 验证。模拟器不能替代真实游戏的手感与命中判定。</p>
+          </article>
+        </div>
+        <p class="method-note">34% 是社区常用的移动精度参考；实际武器 inaccuracy 随武器、距离和射击状态变化。报告会同时给出原始速度，不只看“过/不过”。</p>
+      </section>
+    </section>
+
+    <!-- ============================================================
+         TEST
+    ============================================================ -->
+    <section class="screen" id="screen-test">
+      <div class="test-top">
+        <div>
+          <div class="kicker">LIVE RUN / <span id="testRoleLabel">BASELINE</span></div>
+          <h2 id="testTitle">REP 01 / 20</h2>
+        </div>
+        <div class="test-top-actions">
+          <span class="pro-top-config" id="testConfigLabel">当前设置</span>
+          <button class="btn btn-ghost btn-sm" id="abortRunBtn" type="button">退出测试</button>
+        </div>
+      </div>
+
+      <div class="cs-layout">
+        <div class="cs-stage" id="csStage">
+          <div class="cs-top">
+            <span class="stage-label">COUNTER-STRAFE LAB / <span id="csWeaponLabel">AK-47 · 215 u/s</span></span>
+            <div class="cs-top-right">
+              <span id="csModeLabel">BLIND TEST</span>
+              <span class="timer" id="csRepLabel">REP 01 / 20</span>
+            </div>
+          </div>
+
+          <div class="cs-hud-row">
+            <div class="cs-hud-item"><span>当前速度</span><b id="csSpeedHud">—</b><small>u/s</small></div>
+            <div class="cs-hud-item"><span>精度带</span><b id="csBandHud">≤ 73</b><small>u/s</small></div>
+            <div class="cs-hud-item"><span>上次开枪</span><b id="csLastShotHud">—</b><small id="csLastShotState">—</small></div>
+          </div>
+
+          <div class="cs-range" id="csRange">
+            <div class="cs-range-grid"></div>
+            <div class="cs-target" id="csTarget">
+              <div class="cs-target-ring outer"></div>
+              <div class="cs-target-ring mid"></div>
+              <div class="cs-target-ring inner"></div>
+              <div class="cs-target-dot"></div>
+              <div class="cs-target-label">TARGET</div>
+            </div>
+            <div class="cs-crosshair"></div>
+            <div class="cs-direction" id="csDirection">HOLD A</div>
+            <div class="cs-window hidden" id="csWindow">
+              <span>SHOT WINDOW</span>
+              <div class="cs-window-track"><div class="cs-window-fill" id="csWindowFill"></div></div>
+            </div>
+            <div class="cs-shot-flash" id="csShotFlash"></div>
+            <div class="cs-float-result hidden" id="csFloatResult"></div>
+            <div class="cs-speed-meter" id="csSpeedMeter">
+              <div class="cs-speed-fill" id="csSpeedFill"></div>
+              <div class="cs-speed-marker"></div>
+            </div>
+          </div>
+
+          <div class="cs-telemetry">
+            <div class="cs-trace-wrap">
+              <canvas id="csTrace" width="900" height="150"></canvas>
+              <div class="cs-trace-labels"><span>+ MAX</span><span>0</span><span>− MAX</span></div>
+            </div>
+            <div class="cs-key-row">
+              <div class="cs-key" id="csKeyA"><b>A</b><small>OLD</small></div>
+              <div class="cs-key" id="csKeyD"><b>D</b><small>COUNTER</small></div>
+              <div class="cs-key cs-key-mouse" id="csKeyMouse"><b>M1</b><small>SHOT</small></div>
+            </div>
+          </div>
+
+          <div class="cs-hint" id="csHint">按住 A 开始。目标出现后松开 A、点按 D，并在速度进入精度带后点击靶区。</div>
+
+          <div class="stage-overlay hidden" id="testOverlay">
+            <div class="overlay-card">
+              <div class="overlay-kicker" id="testOverlayKicker">READY</div>
+              <h3 id="testOverlayTitle">按住 A</h3>
+              <p id="testOverlayText">保持方向键，目标出现后再行动。</p>
+              <div class="overlay-stats hidden" id="testOverlayStats"></div>
+              <div class="overlay-actions" id="testOverlayActions"></div>
+            </div>
+          </div>
+
+          <div class="progress-dots" id="csDots"></div>
+        </div>
+
+        <aside class="cs-side">
+          <div class="panel live-panel">
+            <div class="panel-head"><h3>实时数据</h3><span id="liveModeLabel">BLIND</span></div>
+            <div class="stat-box"><span>完成 / 尝试</span><b id="liveValid">0 / 0</b></div>
+            <div class="stat-box"><span>精度带命中</span><b id="liveAccuracy">—</b></div>
+            <div class="stat-box"><span>中位停速</span><b id="liveStop">—</b></div>
+            <div class="stat-box"><span>中位间隔</span><b id="liveGap">—</b></div>
+            <div class="stat-box"><span>过冲率</span><b id="liveOvershoot">—</b></div>
+          </div>
+
+          <div class="panel protocol-mini">
+            <div class="panel-head"><h3>当前条件</h3><span>LOCKED</span></div>
+            <div class="stat-box"><span>武器</span><b id="liveWeapon">AK-47</b></div>
+            <div class="stat-box"><span>精度带</span><b id="liveBand">≤ 73 u/s</b></div>
+            <div class="stat-box"><span>物理步长</span><b>1 ms</b></div>
+            <div class="stat-box"><span>模式</span><b id="liveModeText">盲测</b></div>
+            <div class="stat-box"><span>理论最优停速</span><b id="csIdealSide">—</b></div>
+            <div class="stat-box"><span>本组有效率</span><b id="csEffSide">—</b></div>
+            <div class="stat-box"><span>完成样本</span><b id="csValidSide">0 / 0</b></div>
+          </div>
+
+          <div class="check-list">
+            <div><i>01</i> 目标出现前保持方向键</div>
+            <div><i>02</i> 松旧键 + 点按反键</div>
+            <div><i>03</i> 速度进精度带再开枪</div>
+            <div><i>04</i> 开枪后松开反键，系统才能测过冲</div>
+          </div>
+
+          <div class="reading-card">
+            <span>BLIND MODE</span>
+            <p>测评模式不显示实时速度，避免你盯着仪表盘调整按键。开枪后只显示这一组的原始数据。</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         REPORT
+    ============================================================ -->
+    <section class="screen report-screen" id="screen-report">
+      <div class="demo-banner hidden" id="demoBanner">
+        <span>DEMO</span>
+        <div>这是示例数据，用于展示职业级报告结构；不会覆盖你的真实测试记录。</div>
+        <button id="exitDemo" type="button">退出示例</button>
+      </div>
+      <div class="report-head">
+        <div>
+          <div class="kicker">COUNTER-STRAFE REPORT</div>
+          <h1 id="reportTitle">急停报告</h1>
+          <p class="report-meta" id="reportMeta">—</p>
+        </div>
+        <div class="report-score">
+          <span>BASE BLOCK SCORE</span>
+          <b id="reportScore">—</b>
+          <small id="reportGrade">—</small>
+        </div>
+      </div>
+
+      <div class="report-toolbar">
+        <div class="role-row" id="reportRoleRow">
+          <button class="role-chip is-selected" data-role="baseline" type="button">基准</button>
+          <button class="role-chip" data-role="ab" type="button">A/B 第二组</button>
+        </div>
+        <div class="chips chips-small" id="traceSelect">
+          <button type="button" data-sample="median" class="is-selected">中位样本</button>
+          <button type="button" data-sample="best">最佳</button>
+          <button type="button" data-sample="worst">最差</button>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="panel metric-panel">
+          <div class="panel-head"><h3>核心指标</h3><span id="metricSampleCount">—</span></div>
+          <div class="metric-grid" id="metricGrid"></div>
+        </div>
+        <div class="panel trace-panel">
+          <div class="panel-head"><h3>速度曲线</h3><span id="traceCaption">—</span></div>
+          <div class="trace-canvas-wrap">
+            <canvas id="reportTrace" width="1000" height="310"></canvas>
+          </div>
+          <div class="trace-legend">
+            <span><i class="lime"></i>旧方向速度</span>
+            <span><i class="red"></i>反向过冲</span>
+            <span><i class="band"></i>34% 精度带</span>
+            <span><i class="marker"></i>松键 / 反键 / 开枪</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel scatter-panel">
+        <div class="panel-head"><h3>单组分布</h3><span>停速 × 开枪速度</span></div>
+        <div class="scatter-wrap">
+          <canvas id="reportScatter" width="1100" height="300"></canvas>
+        </div>
+        <p class="chart-note">点越靠左上越好：停得更快，开枪更慢（更接近零速度）。红色 = 开枪时在精度带外。</p>
+      </div>
+
+      <div class="panel pressure-panel hidden" id="pressurePanel">
+        <div class="panel-head"><h3>比赛模拟 / 压力转移</h3><span id="pressureNote">—</span></div>
+        <div class="pressure-grid" id="pressureGrid"></div>
+        <p class="chart-note" id="pressureVerdict"></p>
+      </div>
+
+      <div class="panel diagnosis-panel">
+        <div class="panel-head"><h3>技术诊断</h3><span>先看动作，再看参数</span></div>
+        <div class="insights" id="diagnosisList"></div>
+      </div>
+
+      <div class="panel settings-panel">
+        <div class="panel-head"><h3>参数起点与 A/B 建议</h3><span>不是唯一答案</span></div>
+        <div class="settings-layout">
+          <div>
+            <p class="settings-intro" id="settingsIntro">—</p>
+            <div class="recommend-grid" id="recommendGrid"></div>
+            <p class="settings-warning">参数只影响输入被游戏读到的时刻，不能替代松键、反键和开枪时机。先固定技术，再用相同 20 次做 A/B。</p>
+          </div>
+          <div class="ab-cta">
+            <span>A/B TEST</span>
+            <h3>只改一个参数，<br>再测一组。</h3>
+            <p>建议先改 RT 抬起或触发行程。保持同一武器、同一次数、同一模式。</p>
+            <button class="btn btn-primary" id="startABBtn" type="button">测试第二套配置 →</button>
+            <button class="btn btn-ghost" id="newBaselineBtn" type="button">建立新基准</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel ab-panel hidden" id="abPanel">
+        <div class="panel-head"><h3>A/B 对比</h3><span id="abNote">—</span></div>
+        <div class="ab-grid" id="abGrid"></div>
+        <p class="chart-note">对比受单次发挥影响。建议至少重复 2 次 A/B，或交替测试，避免把疲劳当成设置差异。</p>
+      </div>
+
+      <div class="panel validation-panel">
+        <div class="panel-head"><h3>游戏内复验</h3><span>EXTERNAL VALIDITY</span></div>
+        <div class="validation-grid">
+          <div>
+            <h4>Counter-strafe Master</h4>
+            <p>Workshop ID <code>3667395967</code>。这张图直接用玩家速度、停速和开枪精度评分，适合验证模拟结果。</p>
+          </div>
+          <div>
+            <h4>cl_showpos / aim_botz</h4>
+            <p>离线服务器 <code>sv_cheats 1</code> + <code>cl_showpos 1</code> 看速度；或用 aim_botz 做 10 分钟左右移动急停。</p>
+          </div>
+          <div>
+            <h4>验证协议</h4>
+            <p>先打 3 局死斗，再回本工具复测。不要在同一局里同时改触发、死区和 RT。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-actions">
+        <button class="btn btn-ghost" id="reportBackBtn" type="button">← 返回设置</button>
+        <div class="action-group">
+          <button class="btn btn-ghost" id="copyReportBtn" type="button">复制摘要</button>
+          <button class="btn btn-ghost" id="downloadCsvBtn" type="button">导出 CSV</button>
+          <button class="btn btn-ghost" id="printReportBtn" type="button">打印 / PDF</button>
+          <button class="btn btn-primary" id="startABBtnBottom" type="button">测试第二套配置</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer pro-footer">
+    <div>MAGLAB PRO · CS2 急停实验室</div>
+    <div>本地运行 · Source 物理模型 · 不读取游戏内存 · 不替代游戏内验证</div>
+    <div><a href="basic.html">基础习惯测试（静置 / 连点 / 悬停）→</a></div>
+    <div><a href="tools.html">MAGLAB 磁轴工具箱（传感器角度 / 运算延迟优化）→</a></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=1.7"></script>
+</body>
+</html>

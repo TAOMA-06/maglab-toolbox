@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CS2 电脑运算延迟优化工具 · 针对右上角帧数左侧【最高 ~ 毫秒】生成 Windows 一键优化脚本">
+  <title>CS2 电脑运算延迟优化 · MAGLAB 工具箱</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tools.css">
+  <link rel="stylesheet" href="optimizer.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar pro-topbar">
+    <a class="brand" href="tools.html" aria-label="返回工具箱首页">
+      <span class="brand-mark">M</span>
+      <span class="brand-text">MAGLAB<small>SYSTEM OPTIMIZER</small></span>
+    </a>
+    <div class="pro-top-center">
+      <span class="pro-badge">WINDOWS · CS2 · FRAME TIME</span>
+      <span class="pro-top-config" id="topConfigLabel">运算延迟优化</span>
+    </div>
+    <div class="top-actions">
+      <a href="tools.html" class="icon-btn" target="_blank" rel="noopener">返回工具箱</a>
+      <button class="icon-btn" id="resetBtn" type="button">重置</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen is-active" id="screen-optimizer">
+      <div class="opt-header">
+        <div class="opt-header-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> 模块三 · CS2 电脑运算延迟优化</div>
+          <h1>降低 CS2 右上角帧数左侧的<br><span class="text-lime">【最高 ~ 毫秒】</span></h1>
+          <p class="lead">
+            该数值反映 CPU 每帧运算耗时（frametime / CPU frame time）。数值越高，鼠标操作到屏幕反馈的电脑运算延迟越大。
+            本工具生成 Windows 一键优化脚本（电源计划、游戏模式、GPU 调度、CS2 启动参数等），降低运算延迟，提升帧次稳定性。
+          </p>
+          <div class="opt-sysrow">
+            <div class="sys-chip"><b id="sysCores">—</b><small>CPU 逻辑核心</small></div>
+            <div class="sys-chip"><b id="sysMem">—</b><small>设备内存</small></div>
+            <div class="sys-chip"><b id="sysScreen">—</b><small>屏幕</small></div>
+            <div class="sys-chip"><b id="sysUA">—</b><small>平台</small></div>
+          </div>
+          <p class="opt-note">
+            <b>重要：</b> 浏览器无法直接修改系统设置，因此生成的 <code>.bat</code> 脚本请下载后<strong>右键 → 以管理员身份运行</strong>。
+            执行完毕后重启电脑，再在 Steam → CS2 属性 → 启动选项中填入建议参数，启动 CS2 观察右上角帧数左侧毫秒数是否下降。
+          </p>
+        </div>
+      </div>
+
+      <div class="opt-body">
+        <!-- 左：优化项 -->
+        <div class="panel opt-list-panel">
+          <div class="panel-head"><h3>优化项目</h3><span>ONE-CLICK SCRIPT</span></div>
+          <div class="opt-notice">
+            ⚠️ 这里的开关只是“<b>你要优化什么</b>”的选择，<b>不是系统实际状态</b>。网页无法读取 Windows 设置，刷新后开关会保持你上次的选择。要验证优化是否真正生效，请运行同目录下的 <code>检查优化状态.bat</code>。
+          </div>
+
+          <div class="opt-item" id="opt-power">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">电源计划 → 高性能 / 终极性能</div>
+                <div class="opt-item-desc">防止 CPU 频率下调，保持 CS2 单核运算频率，降低帧耗时。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swPower" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-high">影响：高</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('power')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-gamemode">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">Windows 游戏模式 → 开启</div>
+                <div class="opt-item-desc">让 Windows 在游戏时优先分配 CPU/GPU 资源，减少后台任务抢占。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swGameMode" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-mid">影响：中</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('gamemode')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-gpusched">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">硬件加速 GPU 调度 → 开启</div>
+                <div class="opt-item-desc">将部分 GPU 调度任务交给 GPU 硬件，可降低部分场景下的帧提交延迟（需 Win10 2004+ / Win11）。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swGpuSched"><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-mid">影响：中/视机型</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('gpusched')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-cs2launch">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">CS2 启动参数优化</div>
+                <div class="opt-item-desc">在 Steam 属性中设置启动选项，如 <code>-freq 144 -novid +fps_max 0 +cl_forcepreload 1</code>。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swCs2Launch" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-high">影响：高</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.copyLaunch()">复制参数</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-cs2priority">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">CS2 进程优先级 → 高</div>
+                <div class="opt-item-desc">游戏运行时将 cs2.exe 优先级设为“高”，减少被后台进程抢占 CPU 时间片。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swCs2Priority"><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-mid">影响：中</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('priority')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-temp">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">清理系统临时文件</div>
+                <div class="opt-item-desc">清空 %TEMP% 与预取文件，释放磁盘空间，轻微改善系统响应。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swTemp" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-low">影响：低</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('temp')">应用此项</button>
+            </div>
+          </div>
+
+        <!-- 笔记本专用优化 -->
+        <div class="panel opt-nb-panel">
+          <div class="panel-head" style="cursor:pointer;" onclick="optApp.toggleNB()">
+            <h3>💻 笔记本专用优化</h3>
+            <span id="nbToggle">展开</span>
+          </div>
+          <div id="nbContent" style="display:none; padding-top:10px;">
+            <div class="opt-item" id="opt-nb-dgpu">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">独显直连 / 强制独显输出</div>
+                  <div class="opt-item-desc">笔记本混合显卡（NVIDIA Optimus / AMD 混合显卡）强制独显直输，绕过核显，降低帧提交延迟。需在 NVIDIA 控制面板 / AMD 驱动中设置 CS2 为“高性能 NVIDIA 处理器”。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbDgpu"><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-high">影响：高</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.copyNbDgpuTip()">查看设置方法</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-cpu-min">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">插电时最小处理器状态 100%</div>
+                  <div class="opt-item-desc">防止笔记本 CPU 在游戏中降频节能，保持单核运算频率，降低 CS2 帧耗时。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbCpuMin" checked><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-high">影响：高</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbcpumin')">应用此项</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-usb">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">禁用 USB 选择性暂停</div>
+                  <div class="opt-item-desc">防止笔记本 USB 接口进入低功耗导致鼠标轮询延迟或掉线，保持鼠标稳定输出。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbUsb" checked><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-mid">影响：中</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbusb')">应用此项</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-pcie">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">禁用 PCI Express 链路状态电源管理</div>
+                  <div class="opt-item-desc">关闭 PCIe ASPM 节能，避免独显/硬件在低负载时降频，提升帧稳定性。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbPcie"><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-mid">影响：中</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbpcie')">应用此项</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-fastboot">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">关闭 Windows 快速启动</div>
+                  <div class="opt-item-desc">快速启动可能导致驱动未完全初始化，关闭后可保证每次开机驱动完整加载，减少延迟波动。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbFastboot"><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-mid">影响：中</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbfastboot')">应用此项</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-sysmain">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">禁用 SysMain（Superfetch）</div>
+                  <div class="opt-item-desc">笔记本机械硬盘或资源紧张时，禁用该服务可释放内存和磁盘I/O，减少卡顿。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbSysmain" checked><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-low">影响：低</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbsysmain')">应用此项</button>
+              </div>
+            </div>
+
+            <div class="opt-item" id="opt-nb-wsearch">
+              <div class="opt-item-head">
+                <div>
+                  <div class="opt-item-title">禁用 Windows 搜索索引</div>
+                  <div class="opt-item-desc">减少后台磁盘占用，适合笔记本游戏时降低系统背景负载。</div>
+                </div>
+                <label class="opt-switch"><input type="checkbox" id="swNbWsearch"><span></span></label>
+              </div>
+              <div class="opt-item-meta">
+                <span class="impact impact-low">影响：低</span>
+                <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('nbwsearch')">应用此项</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <div class="opt-actions">
+            <button class="btn btn-primary btn-lg" id="btnGenScript" type="button">生成一键优化脚本 (.bat)</button>
+            <button class="btn btn-ghost btn-lg" id="btnDownload" type="button" style="display:none">下载脚本</button>
+          </div>
+
+          <div class="opt-note-box">
+            <b>执行顺序建议：</b>
+            1) 下载并以管理员身份运行生成的 .bat → 2) 重启电脑 → 3) Steam 设置 CS2 启动参数 → 4) 启动 CS2，打开 <code>cl_showfps 2</code> 观察右上角帧数左侧毫秒数。
+          </div>
+        </div>
+
+        <!-- 右：预览 / 脚本 / 建议 -->
+        <div class="panel opt-preview-panel" style="position:sticky;top:92px">
+          <div class="panel-head"><h3>脚本预览</h3><span>BATCH PREVIEW</span></div>
+          <div class="script-wrap">
+            <pre id="scriptPreview">@echo off
+:: MAGLAB CS2 电脑运算延迟一键优化脚本
+:: 请以管理员身份运行，执行完毕后重启电脑
+echo 正在优化...
+rem 此处将根据你的勾选生成对应命令
+pause</pre>
+            <button class="btn btn-ghost btn-xs" id="btnCopyScript" style="position:absolute;top:8px;right:8px">复制脚本</button>
+          </div>
+          <div class="opt-expected">
+            <div class="opt-expected-head">预期改善方向</div>
+            <div class="expected-list">
+              <div class="expected-item"><span>●</span><div><b>帧耗时下降</b><small>CPU 每帧运算更稳，右上角【最高 ~ 毫秒】数值变小</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>1% Low 更稳</b><small>减少突发卡顿与掉帧，配合粉丝/1% Low 更稳定</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>输入到显示延迟降低</b><small>电脑运算环节更快，鼠标反馈更迅速</small></div></div>
+            </div>
+          </div>
+          <div class="opt-cs2cvars">
+            <div class="opt-expected-head">CS2 游戏内控制台建议</div>
+            <div class="expected-list">
+              <div class="expected-item"><span>●</span><div><b>cl_showfps 2</b><small>打开帧数面板，观察右上角帧数左侧毫秒数</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>mat_queue_mode 2</b><small>多线程渲染（多数现代 CPU 建议开启）</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>r_drawparticles 0 / r_3dsky 0</b><small>低配/竞技设置可进一步降低 GPU/CPU 负担</small></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="opt-footer">
+        <p>所有操作仅在本机生成脚本，不修改注册表或系统文件（除非你自行运行 .bat），不上传任何数据。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer pro-footer">
+    <div>MAGLAB 工具箱 · CS2 电脑运算延迟优化</div>
+    <div>本地生成脚本 · 建议以管理员身份运行 .bat · 最终以游戏内 cl_showfps 表现为准</div>
+    <div><a href="tools.html">返回工具箱 →</a> &nbsp;|&nbsp; <a href="sensor.html">鼠标传感器角度 →</a></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="optimizer.js?v=1.0"></script>
+</body>
+</html>
