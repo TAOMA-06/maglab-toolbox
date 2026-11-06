@@ -35,4 +35,13 @@ powercfg /query SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d27
 echo.
 echo ============================================
 echo 检查完成。按任意键退出。
+
+echo [10] 鼠标增强指针精确度（3 项全 0=已关闭）：
+reg query "HKCU\Control Panel\Mouse" /v MouseSpeed 2>nul
+reg query "HKCU\Control Panel\Mouse" /v MouseThreshold1 2>nul
+reg query "HKCU\Control Panel\Mouse" /v MouseThreshold2 2>nul
+echo.
+echo [11] NVIDIA Reflex / 全屏优化 / 内存完整性为游戏内手动项，
+echo      请在 CS2 设置与 Windows 安全中心中确认。
+echo.
 pause >nul

@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 # MAGLAB 磁轴工具箱 · CS2 辅助桌面程序 (Windows)
 # 技术栈：Python 3 + tkinter（标准库，无需第三方依赖）
 # 功能：
@@ -447,14 +447,14 @@ class OptimizerTab(ttk.Frame):
              "防止 CPU 频率下调，保持 CS2 单核运算频率，降低帧耗时。", "高"),
             ("gamemode", "Windows 游戏模式 → 开启",
              "让 Windows 在游戏时优先分配 CPU/GPU 资源，减少后台抢占。", "中"),
-            ("gpusched", "硬件加速 GPU 调度 → 开启",
-             "将部分 GPU 调度交给硬件，降低部分场景下的帧提交延迟（Win10 2004+/Win11）。", "中"),
+            ("gpusched", "硬件加速 GPU 调度 → 按显卡分代",
+             "40/50 系开（吃 Reflex），10/20 系关，30 系两边都测；改完重启。", "中"),
             ("cs2launch", "CS2 启动参数优化",
-             "在 Steam 属性中设置启动选项，如 -freq 144 -novid +fps_max 0。", "高"),
+             "在 Steam 属性中设置启动选项（-freq 填你的显示器刷新率）。", "高"),
             ("cs2prio",  "CS2 进程优先级 → 高",
              "游戏运行时将 cs2.exe 优先级设为“高”。", "中"),
             ("temp",     "清理系统临时文件",
-             "清空 %TEMP% 与预取文件，轻微改善系统响应。", "低"),
+             "清空 %TEMP%。主要释放磁盘空间，对帧耗时基本无直接影响。", "低"),
         ]
         row = 1
         for key, title, desc, impact in items:
@@ -645,7 +645,7 @@ class OptimizerTab(ttk.Frame):
         if self.vars["power"].get():
             step += 1
             lines.append(f":: [{step}] 电源计划 -> 高性能/终极性能")
-            lines.append("echo [1] 设置电源计划为高性能...")
+            lines.append(f"echo [{step}] 设置电源计划为高性能...")
             lines.append("powercfg /setactive SCHEME_MAX >nul 2>&1")
             lines.append("powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c >nul 2>&1")
             lines.append("if %errorlevel% equ 0 (echo [OK] 电源计划已设为高性能) else (echo [!] 电源计划设置失败)")
@@ -654,7 +654,7 @@ class OptimizerTab(ttk.Frame):
         if self.vars["gamemode"].get():
             step += 1
             lines.append(f":: [{step}] Windows 游戏模式 -> 开启")
-            lines.append('echo [2] 开启 Windows 游戏模式...')
+            lines.append(f'echo [{step}] 开启 Windows 游戏模式...')
             lines.append('reg add "HKCU\\Software\\Microsoft\\GameBar" /v AutoGameModeEnabled /t REG_DWORD /d 1 /f >nul 2>&1')
             lines.append('reg add "HKCU\\Software\\Microsoft\\GameBar" /v AllowAutoGameMode /t REG_DWORD /d 1 /f >nul 2>&1')
             lines.append("if %errorlevel% equ 0 (echo [OK] 游戏模式已开启) else (echo [!] 游戏模式设置失败)")
@@ -663,15 +663,16 @@ class OptimizerTab(ttk.Frame):
         if self.vars["gpusched"].get():
             step += 1
             lines.append(f":: [{step}] 硬件加速 GPU 调度 -> 开启")
-            lines.append('echo [3] 开启硬件加速 GPU 调度...')
+            lines.append(f'echo [{step}] 硬件加速 GPU 调度（40/50 系开，10/20 系请手动改 0，改完重启）...')
             lines.append('reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers" /v HwSchMode /t REG_DWORD /d 1 /f >nul 2>&1')
+            lines.append("echo    注：10/20 系建议把上行 /d 1 改成 /d 0；改完必须重启电脑。")
             lines.append("if %errorlevel% equ 0 (echo [OK] 硬件加速 GPU 调度已开启) else (echo [!] GPU 调度设置失败)")
             lines.append("echo.")
 
         if self.vars["temp"].get():
             step += 1
             lines.append(f":: [{step}] 清理系统临时文件")
-            lines.append("echo [4] 清理临时文件...")
+            lines.append(f"echo [{step}] 清理临时文件...")
             lines.append('del /q /s /f "%TEMP%\\*" >nul 2>&1')
             lines.append("echo [OK] 临时文件已清理")
             lines.append("echo.")
@@ -679,14 +680,14 @@ class OptimizerTab(ttk.Frame):
         if self.vars["cs2launch"].get():
             step += 1
             lines.append(f":: [{step}] CS2 启动参数提示")
-            lines.append('echo [5] 请手动在 Steam 中设置 CS2 启动选项：')
-            lines.append('echo    右键 CS2 -> 属性 -> 启动选项 -> 填入：-freq 144 -novid +fps_max 0 +cl_forcepreload 1 +mat_queue_mode 2 -high')
+            lines.append(f'echo [{step}] 请手动在 Steam 中设置 CS2 启动选项：')
+            lines.append('echo    右键 CS2 -> 属性 -> 启动选项 -> 填入：-freq <你的刷新率> -novid -nojoy +fps_max 0')
             lines.append("echo.")
 
         if self.vars["cs2prio"].get():
             step += 1
             lines.append(f":: [{step}] CS2 进程优先级提示")
-            lines.append('echo [6] CS2 运行时：任务管理器 -> 详细信息 -> cs2.exe -> 右键 -> 设置优先级 -> 高')
+            lines.append(f'echo [{step}] CS2 运行时：任务管理器 -> 详细信息 -> cs2.exe -> 右键 -> 设置优先级 -> 高')
             lines.append("echo.")
 
         # 笔记本专用优化

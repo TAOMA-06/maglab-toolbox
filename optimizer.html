@@ -90,13 +90,20 @@
           <div class="opt-item" id="opt-gpusched">
             <div class="opt-item-head">
               <div>
-                <div class="opt-item-title">硬件加速 GPU 调度 → 开启</div>
-                <div class="opt-item-desc">将部分 GPU 调度任务交给 GPU 硬件，可降低部分场景下的帧提交延迟（需 Win10 2004+ / Win11）。</div>
+                <div class="opt-item-title">硬件加速 GPU 调度 → 按显卡分代设置</div>
+                <div class="opt-item-desc">40/50 系开（吃 NVIDIA Reflex），10/20 系关（帧时间更稳），30 系两边都测。需 Win10 2004+ / Win11，改完重启生效。</div>
               </div>
               <label class="opt-switch"><input type="checkbox" id="swGpuSched"><span></span></label>
             </div>
             <div class="opt-item-meta">
               <span class="impact impact-mid">影响：中/视机型</span>
+              <label style="font-size:11px;color:var(--muted)">我的显卡：
+                <select id="gpuGen" style="background:#0c121a;color:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 6px">
+                  <option value="rtx40" selected>RTX 40 / 50 系（或不确定）</option>
+                  <option value="rtx30">RTX 30 系</option>
+                  <option value="gtx10">GTX 10 / RTX 20 系</option>
+                </select>
+              </label>
               <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('gpusched')">应用此项</button>
             </div>
           </div>
@@ -105,7 +112,7 @@
             <div class="opt-item-head">
               <div>
                 <div class="opt-item-title">CS2 启动参数优化</div>
-                <div class="opt-item-desc">在 Steam 属性中设置启动选项，如 <code>-freq 144 -novid +fps_max 0 +cl_forcepreload 1</code>。</div>
+                <div class="opt-item-desc">在 Steam 属性中设置启动选项（-freq 按你显示器刷新率自动生成，不写死）。</div>
               </div>
               <label class="opt-switch"><input type="checkbox" id="swCs2Launch" checked><span></span></label>
             </div>
@@ -125,7 +132,7 @@
             </div>
             <div class="opt-item-meta">
               <span class="impact impact-mid">影响：中</span>
-              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('priority')">应用此项</button>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('cs2priority')">应用此项</button>
             </div>
           </div>
 
@@ -133,13 +140,69 @@
             <div class="opt-item-head">
               <div>
                 <div class="opt-item-title">清理系统临时文件</div>
-                <div class="opt-item-desc">清空 %TEMP% 与预取文件，释放磁盘空间，轻微改善系统响应。</div>
+                <div class="opt-item-desc">清空 %TEMP%，释放磁盘空间。对帧耗时基本无直接影响，只做清理。</div>
               </div>
               <label class="opt-switch"><input type="checkbox" id="swTemp" checked><span></span></label>
             </div>
             <div class="opt-item-meta">
               <span class="impact impact-low">影响：低</span>
               <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('temp')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-pointer">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">鼠标增强指针精确度 → 关闭</div>
+                <div class="opt-item-desc">FPS 必关项。关闭 Windows 指针加速，保证游戏内 1:1；Windows 鼠标速度保持 6/11，需注销或重启生效。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swPointer" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-high">影响：高</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('pointer')">应用此项</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-reflex">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">NVIDIA Reflex → 游戏内开启+增强</div>
+                <div class="opt-item-desc">CS2 设置 → 视频 → 高级 → NVIDIA Reflex 低延迟。需 GTX 10 系以上 + 新驱动；驱动里低延迟模式保持默认即可。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swReflex" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-high">影响：高</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('reflex')">查看方法</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-fso">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">禁用 CS2 全屏优化</div>
+                <div class="opt-item-desc">cs2.exe 右键 → 属性 → 兼容性 → 勾选。独占全屏下延迟更稳，已用全屏模式的玩家优先做。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swFSO" checked><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-mid">影响：中</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('fso')">查看方法</button>
+            </div>
+          </div>
+
+          <div class="opt-item" id="opt-vbs">
+            <div class="opt-item-head">
+              <div>
+                <div class="opt-item-title">内存完整性 / VBS → 关闭（可选）</div>
+                <div class="opt-item-desc">Windows 安全中心 → 设备安全性 → 内核隔离 → 关，需重启。这会降低虚拟化安全隔离，个人游戏机可接受，介意者跳过。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swVBS"><span></span></label>
+            </div>
+            <div class="opt-item-meta">
+              <span class="impact impact-low">影响：低-中</span>
+              <button class="btn btn-ghost btn-xs" onclick="optApp.oneClick('vbs')">查看方法</button>
             </div>
           </div>
 
@@ -210,7 +273,7 @@
               <div class="opt-item-head">
                 <div>
                   <div class="opt-item-title">关闭 Windows 快速启动</div>
-                  <div class="opt-item-desc">快速启动可能导致驱动未完全初始化，关闭后可保证每次开机驱动完整加载，减少延迟波动。</div>
+                  <div class="opt-item-desc">只影响开机与驱动初始化，不影响游戏内帧耗时；开关机慢半拍属正常。</div>
                 </div>
                 <label class="opt-switch"><input type="checkbox" id="swNbFastboot"><span></span></label>
               </div>
@@ -224,9 +287,9 @@
               <div class="opt-item-head">
                 <div>
                   <div class="opt-item-title">禁用 SysMain（Superfetch）</div>
-                  <div class="opt-item-desc">笔记本机械硬盘或资源紧张时，禁用该服务可释放内存和磁盘I/O，减少卡顿。</div>
-                </div>
-                <label class="opt-switch"><input type="checkbox" id="swNbSysmain" checked><span></span></label>
+                  <div class="opt-item-desc">SSD 上基本无增益；只有机械盘或内存常年吃满时有用。默认不勾，按需开。</div>
+              </div>
+              <label class="opt-switch"><input type="checkbox" id="swNbSysmain"><span></span></label>
               </div>
               <div class="opt-item-meta">
                 <span class="impact impact-low">影响：低</span>
@@ -238,7 +301,7 @@
               <div class="opt-item-head">
                 <div>
                   <div class="opt-item-title">禁用 Windows 搜索索引</div>
-                  <div class="opt-item-desc">减少后台磁盘占用，适合笔记本游戏时降低系统背景负载。</div>
+                  <div class="opt-item-desc">开始菜单搜索会变慢；只为压后台负载，介意者跳过。</div>
                 </div>
                 <label class="opt-switch"><input type="checkbox" id="swNbWsearch"><span></span></label>
               </div>
@@ -253,6 +316,7 @@
           <div class="opt-actions">
             <button class="btn btn-primary btn-lg" id="btnGenScript" type="button">生成一键优化脚本 (.bat)</button>
             <button class="btn btn-ghost btn-lg" id="btnDownload" type="button" style="display:none">下载脚本</button>
+            <button class="btn btn-ghost btn-lg" id="btnDownloadRollback" type="button">下载回退脚本</button>
           </div>
 
           <div class="opt-note-box">
@@ -282,11 +346,11 @@ pause</pre>
             </div>
           </div>
           <div class="opt-cs2cvars">
-            <div class="opt-expected-head">CS2 游戏内控制台建议</div>
+            <div class="opt-expected-head">CS2 游戏内设置建议（手动）</div>
             <div class="expected-list">
               <div class="expected-item"><span>●</span><div><b>cl_showfps 2</b><small>打开帧数面板，观察右上角帧数左侧毫秒数</small></div></div>
-              <div class="expected-item"><span>●</span><div><b>mat_queue_mode 2</b><small>多线程渲染（多数现代 CPU 建议开启）</small></div></div>
-              <div class="expected-item"><span>●</span><div><b>r_drawparticles 0 / r_3dsky 0</b><small>低配/竞技设置可进一步降低 GPU/CPU 负担</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>NVIDIA Reflex → 开启+增强</b><small>游戏内 视频 → 高级；此前驱动低延迟模式保持默认</small></div></div>
+              <div class="expected-item"><span>●</span><div><b>+fps_max 0</b><small>启动参数里已带；测极限帧数时用，不测时可按显示器刷新率封顶</small></div></div>
             </div>
           </div>
         </div>
