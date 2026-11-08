@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教练复盘 · 5e_g161-20261105184455725211317_dust2_2026-11-05 10:13 · 焦点玩家 Cc-皮蛋solo粥</title>
+<style>
+  :root {
+    --bg: #06090e;
+    --card: #0c121a;
+    --line: rgba(255, 255, 255, 0.075);
+    --text: #e9eff7;
+    --muted: #8b98aa;
+    --accent: #d7ff3f;
+    --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 22px;
+  }
+  main { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 10px; color: var(--text); letter-spacing: 0.01em; }
+  h2 { font-size: 16px; font-weight: 700; margin: 28px 0 12px; color: var(--text); }
+  h3 { font-size: 16px; font-weight: 600; margin: 16px 0 10px; color: var(--text); }
+  h3.h-yours { color: var(--accent); }
+  h3.h-split { color: var(--muted); }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 12px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--muted); font-size: 12px;
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .badge.score { color: var(--accent); border-color: rgba(215, 255, 63, 0.35); }
+  .badge.focus { color: var(--text); }
+  .badge.focus .dot { background: var(--muted); }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px 18px; margin: 12px 0;
+  }
+  .note {
+    border-left: 3px solid var(--accent); padding: 10px 14px;
+    background: var(--card); border-radius: 0 10px 10px 0;
+    color: var(--muted); margin: 12px 0;
+  }
+  .lead { font-size: 14px; color: var(--text); }
+  .facts { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .round-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .round-no { color: var(--accent); font-weight: 700; }
+  .tick-badge {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px;
+    background: var(--bg); user-select: all;
+  }
+  .seg { border-radius: 10px; padding: 10px 12px; margin: 8px 0; background: var(--card); }
+  .seg-why { border-left: 3px solid var(--muted); }
+  .seg-title { font-size: 13px; letter-spacing: 0.04em; margin-bottom: 6px; color: var(--muted); }
+  .ev {
+    border-left: 3px solid var(--line); padding: 4px 10px; margin: 6px 0;
+    background: var(--bg); border-radius: 0 8px 8px 0;
+    color: var(--text); font-size: 14px;
+  }
+  .ev .t {
+    display: inline-block; font-family: var(--mono); font-size: 12px;
+    color: var(--accent); border: 1px solid var(--line);
+    border-radius: 6px; padding: 0 6px; margin-right: 6px; user-select: all;
+  }
+  .goto {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    margin: 6px 0 2px; user-select: all;
+  }
+  .tag {
+    display: inline-block; font-size: 12px; padding: 1px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted);
+    background: var(--card); margin-right: 6px;
+  }
+  .good .round-no { color: var(--accent); }
+  .good .tick-badge { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; letter-spacing: 0.05em; }
+  td.count { color: var(--accent); font-weight: 700; }
+  code, .cli {
+    font-family: var(--mono); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px;
+    color: var(--accent); font-size: 13px; user-select: all;
+  }
+  .cli { display: inline-block; padding: 8px 12px; margin: 6px 0; }
+  ul { padding-left: 1.2em; margin: 6px 0; }
+  li { margin: 4px 0; }
+  footer {
+    margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px;
+  }
+  @media (max-width: 640px) { body { padding: 16px 10px 32px; } }
+
+body > .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 56px;
+  min-height: 56px;
+  box-sizing: border-box;
+  margin: -24px -16px 0;
+  padding: 0 28px;
+  background: rgba(6, 9, 14, 0.92);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 0 0 auto;
+  color: var(--text);
+  text-decoration: none;
+}
+.topbar .brand-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #06090e;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 11px;
+}
+.topbar .brand-text {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.topbar .tool-nav { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.topbar .tool-nav a {
+  display: inline-flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.topbar .tool-nav a:hover { color: var(--text); }
+.topbar .tool-nav a.is-current,
+.topbar .tool-nav a[aria-current="page"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+@media (max-width: 640px) {
+  body > .topbar { margin: -16px -10px 0; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../tools.html" aria-label="MAGLAB 工具箱">
+    <span class="brand-mark">M</span>
+    <span class="brand-text">MAGLAB</span>
+  </a>
+  <nav class="tool-nav" aria-label="工具">
+    <a href="../index.html">急停</a>
+    <a href="../sensor.html">传感器</a>
+    <a href="../optimizer.html">优化</a>
+    <a href="../cs2-sensitivity/index.html">灵敏度</a>
+    <a href="index.html" aria-current="page" class="is-current">赛后</a>
+  </nav>
+</header>
+<main>
+  <header>
+    <h1>教练复盘 · 5e_g161-20261105184455725211317_dust2_2026-11-05 10:13 · 焦点玩家 Cc-皮蛋solo粥</h1>
+    <div class="badges">
+      <span class="badge"><span class="dot"></span>5e_g161-20261105184455725211317_dust2_2026-11-05</span>
+      <span class="badge score">10:13</span>
+      <span class="badge focus"><span class="dot"></span>Cc-皮蛋solo粥</span>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>判决</h2>
+    <p class="lead">这场输了，不能说主因不在你。丢的 13 分里，纯队友的有 0 分，队友先倒你后来又死的有 12 分，你先死的有 1 分。</p><p class="facts">队友先倒之后你又死了的，下次就改这一下：别再把自己送进去。先倒的那下你照旧。</p>
+    <h3 class="h-yours">要你改的</h3>
+    <div class="ev">回合 10 是你的。你先被 twisstzz-CS 用 SCAR-20 打死（tick 49935）。下次这下别先死。demo_gototick 49935</div>
+    <h3 class="h-split">分开的</h3>
+    <div class="ev">回合 3 分开。圣诞序章 先被 你红蛋 用 MP5-SD 打死（tick 16221），那下不是你的。你后来被 你红蛋 用 MP5-SD 打死（tick 16748）。demo_gototick 16748</div>
+    <div class="ev">回合 6 分开。DONK 先被 翻斗社会图图 用 SSG 08 打死（tick 32279），那下不是你的。你后来被 twisstzz-CS 用 Desert Eagle 打死（tick 32596）。demo_gototick 32596</div>
+    <div class="ev">回合 7 分开。干拉野牛不糖 先被 你红蛋 用 AK-47 打死（tick 37155），那下不是你的。你后来被 Dexmedetomidine 用 FAMAS 打死（tick 38240）。demo_gototick 38240</div>
+    <div class="ev">回合 9 分开。干拉野牛不糖 先被 twisstzz-CS 用 MP9 打死（tick 45898），那下不是你的。你后来被 twisstzz-CS 用 AK-47 打死（tick 47003）。demo_gototick 47003</div>
+    <div class="ev">回合 11 分开。我是最美美羊羊. 先被 你红蛋 用 M4A1 打死（tick 56948），那下不是你的。你后来被 Dexmedetomidine 用 USP-S 打死（tick 59852）。demo_gototick 59852</div>
+    <div class="ev">回合 12 分开。我是最美美羊羊. 先被 翻斗霸气小美 用 SCAR-20 打死（tick 63047），那下不是你的。你后来被 你红蛋 用 M4A1 打死（tick 64709）。demo_gototick 64709</div>
+    <div class="ev">回合 13 分开。圣诞序章 先被 twisstzz-CS 用 Glock-18 打死（tick 68075），那下不是你的。你后来被 翻斗社会图图 用 Glock-18 打死（tick 68606）。demo_gototick 68606</div>
+    <div class="ev">回合 14 分开。我是最美美羊羊. 先被 翻斗霸气小美 用 XM1014 打死（tick 72525），那下不是你的。你后来被 Dexmedetomidine 用 MAC-10 打死（tick 74343）。demo_gototick 74343</div>
+    <div class="ev">回合 17 分开。我是最美美羊羊. 先被 twisstzz-CS 用 Tec-9 打死（tick 89936），那下不是你的。你后来被 twisstzz-CS 用 M4A1 打死（tick 91962）。demo_gototick 91962</div>
+    <div class="ev">回合 21 分开。DONK 先被 Dexmedetomidine 用 Galil AR 打死（tick 107883），那下不是你的。你后来被 Dexmedetomidine 用 Galil AR 打死（tick 109176）。demo_gototick 109176</div>
+    <div class="ev">回合 22 分开。DONK 先被 你红蛋 用 P90 打死（tick 112935），那下不是你的。你后来被 Dexmedetomidine 用 Galil AR 打死（tick 114406）。demo_gototick 114406</div>
+    <div class="ev">回合 23 分开。我是最美美羊羊. 先被 你红蛋 用 P90 打死（tick 116765），那下不是你的。你后来被 Dexmedetomidine 用 AK-47 打死（tick 118610）。demo_gototick 118610</div><p class="note">未配置 LLM，本报告为纯事实版；配置 LLM 后可得教练解读。</p>
+  </section>
+
+  <section>
+    <h2>值得保留的好回合</h2>
+    <div class="card good">
+      <div class="round-head">
+        <span class="round-no">回合 15</span>
+        <span class="tick-badge">tick 79025</span>
+      </div><div class="ev">焦点方获胜回合中个人贡献最高（评分 5）</div><div class="ev">高光：2 杀、2v2 残局获胜</div>
+      <div class="goto">定位：[tick 79025] · demo_gototick 79025</div>
+    </div>
+    <div class="card good">
+      <div class="round-head">
+        <span class="round-no">回合 16</span>
+        <span class="tick-badge">tick 86043</span>
+      </div><div class="ev">焦点方获胜回合中个人贡献最高（评分 4）</div><div class="ev">高光：1 杀、2v2 残局获胜</div>
+      <div class="goto">定位：[tick 86043] · demo_gototick 86043</div>
+    </div>
+    <div class="card good">
+      <div class="round-head">
+        <span class="round-no">回合 4</span>
+        <span class="tick-badge">tick 25502</span>
+      </div><div class="ev">焦点方获胜回合中个人贡献最高（评分 1）</div><div class="ev">高光：1 杀</div>
+      <div class="goto">定位：[tick 25502] · demo_gototick 25502</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>站位分析</h2>
+    <div class="card">
+      <p class="facts">焦点死亡 14 次，高危 13 次（92.9%）；阈值：暴露距离 2500 units / 暴露半角 45° / 孤立队友间距 800 units / 掩护半径 200 units（死亡前 10 秒）</p>
+      <h3>死亡热区 Top3</h3>
+      <div class="ev">坐标(1070,904)（坐标(1070.4, 903.6)）· 3 次死亡 · 回合 6、10、22（tick 32596、49935、114406）</div>
+      <div class="ev">B 点附近（坐标(-1345, 2683.8)）· 3 次死亡 · 回合 17、21、23（tick 91962、109176、118610）</div>
+      <div class="ev">坐标(-469,1692)（坐标(-468.7, 1691.5)）· 2 次死亡 · 回合 7、14（tick 38240、74343）</div>
+      <h3>高危站位</h3>
+      <div class="ev">回合 3 [tick 16748] B 点附近：暴露枪线 2 条（视锥近似），最近 你红蛋 距离 164.3 units（右前）；死亡前 10 秒无己方烟/火覆盖该位置（半径 200 units 内无有效落点）；最近队友 DONK 距离 1994.7 units（&gt; 800）</div>
+      <div class="ev">回合 6 [tick 32596] 坐标(921,877)：暴露枪线 2 条（视锥近似），最近 你红蛋 距离 521.7 units（正前）；死亡前 10 秒无己方烟/火覆盖该位置（半径 200 units 内无有效落点）</div>
+      <div class="ev">回合 7 [tick 38240] 坐标(-435,1658)：暴露枪线 3 条（视锥近似），最近 Dexmedetomidine 距离 617.9 units（左前）；死亡前 10 秒无己方烟/火覆盖该位置（半径 200 units 内无有效落点）；死亡瞬间无存活队友（残局，不计孤立站位）</div>
+      <div class="ev">回合 8 [tick 42244] 坐标(-2024,1480)：暴露枪线 1 条（视锥近似），最近 twisstzz-CS 距离 457.8 units（正前）；死亡前 10 秒无己方烟/火覆盖该位置（半径 200 units 内无有效落点）；最近队友 干拉野牛不糖 距离 813.8 units（&gt; 800）</div>
+      <div class="ev">回合 9 [tick 47003] A 点附近：暴露枪线 2 条（视锥近似），最近 翻斗社会图图 距离 687.6 units（右前）；死亡前 10 秒无己方烟/火覆盖该位置（半径 200 units 内无有效落点）；死亡瞬间无存活队友（残局，不计孤立站位）</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>对枪分析</h2>
+    <p class="facts">还没有实验室基准</p>
+    <div class="card">
+      <p class="facts">对枪 43 次（预瞄可评估 43 次，无接敌快照 0 次；焦点开火 39 次，先手命中 25 次；焦点击杀 12 / 阵亡 14），预瞄超阈值 7 次，移动中开枪 21 次；阈值：预瞄偏差 15° / 开火速度 100 u/s</p>
+      <h3>对枪明细</h3>
+      <div class="ev">回合 17 [tick 91960] 对 twisstzz-CS：预瞄偏差 66.9°（阈值 15°）；开火速度 21 u/s（阈值 100）；对手先手命中；对手未开火；命中 0/0；结果被击杀。</div>
+      <div class="ev">回合 23 [tick 118608] 对 Dexmedetomidine：预瞄偏差 64.8°（阈值 15°）；开火速度 14 u/s（阈值 100）；对手先手命中；对手未开火；命中 0/0；结果被击杀。</div>
+      <div class="ev">回合 16 [tick 86138] 对 翻斗社会图图：预瞄偏差 53.0°（阈值 15°）；开火速度 0 u/s（阈值 100）；对手先手命中；焦点早开火 0.42s；命中 0/0（对手 1/2）；结果窗口内无击杀。</div>
+      <div class="ev">回合 7 [tick 38232] 对 Dexmedetomidine：预瞄偏差 27.2°（阈值 15°）；开火速度 114 u/s（阈值 100）；对手先手命中；焦点早开火 0.03s；命中 0/9（对手 2/1）；结果被击杀。</div>
+      <div class="ev">回合 14 [tick 74308] 对 Dexmedetomidine：预瞄偏差 9.2°（阈值 15°）；开火速度 190 u/s（阈值 100）；焦点先手命中；焦点早开火 0.09s；命中 3/7（对手 4/6）；结果被击杀。</div>
+      <div class="ev">回合 11 [tick 59634] 对 Dexmedetomidine：预瞄偏差 9.1°（阈值 15°）；开火速度 212 u/s（阈值 100）；焦点先手命中；焦点晚开火 0.66s；命中 4/28（对手 3/10）；结果被击杀。</div>
+      <div class="ev">回合 9 [tick 46738] 对 翻斗社会图图：预瞄偏差 161.3°（阈值 15°）；焦点未开火，急停不可测；对手先手命中；对手命中 1/2；结果窗口内无击杀。</div>
+      <div class="ev">回合 21 [tick 109159] 对 Dexmedetomidine：预瞄偏差 111.3°（阈值 15°）；焦点未开火，急停不可测；对手先手命中；对手命中 4/3；结果被击杀。</div>
+      <div class="ev">回合 8 [tick 42232] 对 twisstzz-CS：预瞄偏差 66.9°（阈值 15°）；焦点未开火，急停不可测；对手先手命中；对手命中 2/3；结果被击杀。</div>
+      <div class="ev">回合 3 [tick 16686] 对 你红蛋：预瞄偏差 3.4°（阈值 15°）；焦点未开火，急停不可测；对手先手命中；对手命中 6/16；结果被击杀。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>追问入口</h2>
+    <div class="card">
+      <p>用 CLI 继续追问（检索该回合数据回答）：</p>
+      <div class="cli">cs2coach ask &lt;analysis.json&gt; &#34;第3回合我为什么不转点？&#34;</div>
+      <p>示例问题：</p>
+      <ul><li>第9回合队友倒下后我为什么没补上枪？</li><li>第9回合这回合道具怎么配才够用？</li><li>第9回合人数优势为什么会丢？</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>如何回看</h2>
+    <div class="card">
+      <p>回看方法：复制 tick（如 106601），在 CS2 里打开该 demo 回放（playdemo），先在设置里开启开发者控制台，然后在控制台输入 demo_gototick 106601 即可跳到对应时刻。</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>事实与证据由规则层（tactics）生成；LLM 只解读不发明——证据引用架构锁。工具：cs2coach。</p>
+    <p>教练复盘 · 5e_g161-20261105184455725211317_dust2_2026-11-05 10:13 · 焦点玩家 Cc-皮蛋solo粥</p>
+  </footer>
+</main>
+</body>
+</html>
