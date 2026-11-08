@@ -1,0 +1,28 @@
+:root {
+  --bg: #06090e;
+  --panel: #0c121a;
+  --panel-2: #0f1722;
+  --panel-3: #131d2a;
+  --line: rgba(255, 255, 255, 0.075);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --text: #e9eff7;
+  --muted: #8b98aa;
+  --muted-2: #5d6b7e;
+  --lime: #d7ff3f;
+  --lime-2: #c6f22a;
+  --cyan: #48dfff;
+  --red: #ff5268;
+  --amber: #ffb648;
+  --radius: 12px;
+  --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs-meta: 12px;
+  --fs-body: 14px;
+  --fs-title: 16px;
+  --fs-section: 20px;
+  --fs-page: 32px;
+  --lh-body: 22px;
+  --space: 8px;
+  --control-h: 40px;
+  --page-max: 1120px;
+}

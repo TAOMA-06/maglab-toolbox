@@ -5,25 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="CS2 电脑运算延迟优化工具 · 针对右上角帧数左侧【最高 ~ 毫秒】生成 Windows 一键优化脚本">
   <title>CS2 电脑运算延迟优化 · MAGLAB 工具箱</title>
+  <link rel="stylesheet" href="maglab.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="tools.css">
   <link rel="stylesheet" href="optimizer.css">
 </head>
 <body>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
-
   <header class="topbar pro-topbar">
-    <a class="brand" href="tools.html" aria-label="返回工具箱首页">
+    <a class="brand" href="tools.html" aria-label="MAGLAB 工具箱">
       <span class="brand-mark">M</span>
-      <span class="brand-text">MAGLAB<small>SYSTEM OPTIMIZER</small></span>
+      <span class="brand-text">MAGLAB</span>
     </a>
+    <nav class="tool-nav" aria-label="工具">
+      <a href="index.html">急停</a>
+      <a href="sensor.html">传感器</a>
+      <a href="optimizer.html" aria-current="page" class="is-current">优化</a>
+      <a href="cs2-sensitivity/index.html">灵敏度</a>
+    </nav>
     <div class="pro-top-center">
-      <span class="pro-badge">WINDOWS · CS2 · FRAME TIME</span>
       <span class="pro-top-config" id="topConfigLabel">运算延迟优化</span>
     </div>
     <div class="top-actions">
-      <a href="tools.html" class="icon-btn" target="_blank" rel="noopener">返回工具箱</a>
       <button class="icon-btn" id="resetBtn" type="button">重置</button>
     </div>
   </header>
@@ -32,12 +34,10 @@
     <section class="screen is-active" id="screen-optimizer">
       <div class="opt-header">
         <div class="opt-header-copy">
-          <div class="eyebrow"><span class="pulse-dot"></span> 模块三 · CS2 电脑运算延迟优化</div>
-          <h1>降低 CS2 右上角帧数左侧的<br><span class="text-lime">【最高 ~ 毫秒】</span></h1>
-          <p class="lead">
-            该数值反映 CPU 每帧运算耗时（frametime / CPU frame time）。数值越高，鼠标操作到屏幕反馈的电脑运算延迟越大。
-            本工具生成 Windows 一键优化脚本（电源计划、游戏模式、GPU 调度、CS2 启动参数等），降低运算延迟，提升帧次稳定性。
-          </p>
+          <div class="page-head">
+            <h1 class="page-title">电脑运算延迟优化</h1>
+            <p class="lead">该数值反映 CPU 每帧运算耗时（frametime / CPU frame time）。数值越高，鼠标操作到屏幕反馈的电脑运算延迟越大。本工具生成 Windows 一键优化脚本（电源计划、游戏模式、GPU 调度、CS2 启动参数等），降低运算延迟，提升帧次稳定性。</p>
+          </div>
           <div class="opt-sysrow">
             <div class="sys-chip"><b id="sysCores">—</b><small>CPU 逻辑核心</small></div>
             <div class="sys-chip"><b id="sysMem">—</b><small>设备内存</small></div>
@@ -54,7 +54,7 @@
       <div class="opt-body">
         <!-- 左：优化项 -->
         <div class="panel opt-list-panel">
-          <div class="panel-head"><h3>优化项目</h3><span>ONE-CLICK SCRIPT</span></div>
+          <div class="panel-head"><h3>优化项目</h3></div>
           <div class="opt-notice">
             ⚠️ 这里的开关只是“<b>你要优化什么</b>”的选择，<b>不是系统实际状态</b>。网页无法读取 Windows 设置，刷新后开关会保持你上次的选择。要验证优化是否真正生效，请运行同目录下的 <code>检查优化状态.bat</code>。
           </div>
@@ -327,7 +327,7 @@
 
         <!-- 右：预览 / 脚本 / 建议 -->
         <div class="panel opt-preview-panel" style="position:sticky;top:92px">
-          <div class="panel-head"><h3>脚本预览</h3><span>BATCH PREVIEW</span></div>
+          <div class="panel-head"><h3>脚本预览</h3></div>
           <div class="script-wrap">
             <pre id="scriptPreview">@echo off
 :: MAGLAB CS2 电脑运算延迟一键优化脚本
@@ -363,9 +363,7 @@ pause</pre>
   </main>
 
   <footer class="site-footer pro-footer">
-    <div>MAGLAB 工具箱 · CS2 电脑运算延迟优化</div>
     <div>本地生成脚本 · 建议以管理员身份运行 .bat · 最终以游戏内 cl_showfps 表现为准</div>
-    <div><a href="tools.html">返回工具箱 →</a> &nbsp;|&nbsp; <a href="sensor.html">鼠标传感器角度 →</a></div>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

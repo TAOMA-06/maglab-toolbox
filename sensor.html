@@ -5,25 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="鼠标传感器旋转角度检测 · 通过轨迹拟合计算传感器旋转偏移，推荐写入驱动的角度">
   <title>鼠标传感器旋转角度检测 · MAGLAB 工具箱</title>
+  <link rel="stylesheet" href="maglab.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="tools.css">
   <link rel="stylesheet" href="sensor.css">
 </head>
 <body>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
-
   <header class="topbar pro-topbar">
-    <a class="brand" href="tools.html" aria-label="返回工具箱首页">
+    <a class="brand" href="tools.html" aria-label="MAGLAB 工具箱">
       <span class="brand-mark">M</span>
-      <span class="brand-text">MAGLAB<small>SENSOR ANGLE</small></span>
+      <span class="brand-text">MAGLAB</span>
     </a>
+    <nav class="tool-nav" aria-label="工具">
+      <a href="index.html">急停</a>
+      <a href="sensor.html" aria-current="page" class="is-current">传感器</a>
+      <a href="optimizer.html">优化</a>
+      <a href="cs2-sensitivity/index.html">灵敏度</a>
+    </nav>
     <div class="pro-top-center">
-      <span class="pro-badge">MOUSE · SENSOR · ROTATION</span>
       <span class="pro-top-config" id="topConfigLabel">传感器角度检测</span>
     </div>
     <div class="top-actions">
-      <a href="tools.html" class="icon-btn" target="_blank" rel="noopener">返回工具箱</a>
       <button class="icon-btn" id="resetBtn" type="button">重置</button>
     </div>
   </header>
@@ -31,8 +33,10 @@
   <main>
     <section class="screen is-active" id="screen-sensor">
       <div class="sensor-header">
-        <div class="eyebrow"><span class="pulse-dot"></span> 模块二 · 鼠标传感器旋转角度</div>
-        <h1>鼠标传感器<span class="text-lime">旋转角度检测</span></h1>
+        <div class="page-head">
+          <h1 class="page-title">鼠标传感器角度</h1>
+          <p class="lead">用于确定部分鼠标传感器的旋转偏移角度。</p>
+        </div>
 
         <ol class="sensor-steps">
           <li><span class="step-num">①</span><div>驱动里把 <b>DPI 设为 400</b>，关闭系统“提高指针精确度”。</div></li>
@@ -78,7 +82,7 @@
 
         <!-- 右：控制面板 -->
         <div class="panel sensor-control-panel">
-          <div class="panel-head"><h3>控制与结果</h3><span>CALIBRATE</span></div>
+          <div class="panel-head"><h3>控制与结果</h3></div>
 
           <div class="ctrl-group">
             <label class="ctrl-label">记录状态</label>
@@ -134,9 +138,7 @@
   </main>
 
   <footer class="site-footer pro-footer">
-    <div>MAGLAB 工具箱 · 鼠标传感器旋转角度检测</div>
     <div>本地运行 · 不上传数据</div>
-    <div><a href="tools.html">返回工具箱 →</a> &nbsp;|&nbsp; <a href="optimizer.html">延迟优化 →</a></div>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

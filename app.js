@@ -2798,6 +2798,31 @@
     downloadText(`MAGLAB-PRO-${stamp}.csv`, csv, 'text/csv;charset=utf-8');
   }
 
+  function baselineDateLabel(timestamp) {
+    const d = new Date(timestamp || Date.now());
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function exportBaseline(result) {
+    if (!result) {
+      toast('还没有实验室基准');
+      return;
+    }
+    const metrics = computeMetrics(result.samples, result.threshold);
+    const payload = {
+      kind: 'maglab-counterstrafe-baseline',
+      version: 1,
+      recordedAt: baselineDateLabel(result.finishedAt),
+      shotSpeedMedian: Math.round(metrics.shotSpeedMedian),
+      stopBandMs: Math.round(metrics.stopBandMedian)
+    };
+    downloadText('maglab-baseline.json', JSON.stringify(payload, null, 2), 'application/json;charset=utf-8');
+    toast('实验室基准已导出');
+  }
+
   /* ------------------------------------------------------------
      Bindings
   ------------------------------------------------------------ */
@@ -2865,6 +2890,11 @@
       if (!result) return;
       exportCsv(result);
       toast('CSV 已导出');
+    });
+
+    $('#exportBaselineBtn')?.addEventListener('click', () => {
+      const result = state[reportRole];
+      exportBaseline(result);
     });
 
     $('#printReportBtn')?.addEventListener('click', () => window.print());

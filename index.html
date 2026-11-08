@@ -5,19 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="MAGLAB PRO：基于 Source 移动物理的 CS2 急停测试。测量速度曲线、34% 精度带、开枪时机、反键过冲与 A/B 参数对比。">
   <title>MAGLAB PRO · CS2 急停实验室</title>
+  <link rel="stylesheet" href="maglab.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
-
   <header class="topbar pro-topbar">
     <a class="brand" href="#" data-screen="setup" aria-label="返回设置">
       <span class="brand-mark">M</span>
-      <span class="brand-text">MAGLAB<small>COUNTER-STRAFE LAB</small></span>
+      <span class="brand-text">MAGLAB</span>
     </a>
+    <nav class="tool-nav" aria-label="工具">
+      <a href="index.html" aria-current="page" class="is-current">急停</a>
+      <a href="sensor.html">传感器</a>
+      <a href="optimizer.html">优化</a>
+      <a href="cs2-sensitivity/index.html">灵敏度</a>
+    </nav>
     <div class="pro-top-center">
-      <span class="pro-badge">CS2 · SOURCE MODEL</span>
       <span class="pro-top-config" id="topConfigLabel">未开始</span>
     </div>
     <div class="top-actions">
@@ -32,62 +35,10 @@
          SETUP
     ============================================================ -->
     <section class="screen is-active" id="screen-setup">
-      <div class="pro-hero">
-        <div class="pro-hero-copy">
-          <div class="eyebrow"><span class="pulse-dot"></span> CS2 · COUNTER-STRAFE PHYSICS</div>
-          <h1>急停不是按键顺序。<br><span class="text-lime">是速度曲线。</span></h1>
-          <p class="lead">
-            A→D 的 keyup/keydown 只能说明你按了什么，说明不了你有没有停下来。
-            MAGLAB PRO 用 Source 移动物理重建你的速度曲线：松键、反键、摩擦、反向加速、开枪时机，全部记录。
-          </p>
-          <div class="pro-stats">
-            <div><b>5.2</b><span>FRICTION</span></div>
-            <div><b>5.5</b><span>ACCELERATE</span></div>
-            <div><b>34%</b><span>ACCURACY BAND</span></div>
-          </div>
-          <div class="pro-hero-note">
-            <span>不是游戏内遥测</span>
-            <p>受控物理模型 + 真实键鼠输入。最终用 Counter-strafe Master / aim_botz 做实战复验。</p>
-          </div>
-          <button class="btn btn-primary pro-hero-cta" id="heroStartBtn" type="button">配置测试 <span class="btn-arrow">→</span></button>
-        </div>
-
-        <div class="pro-hero-art" aria-hidden="true">
-          <div class="art-frame">
-            <div class="art-top"><span>VELOCITY / OLD DIRECTION</span><span>34% BAND</span></div>
-            <svg viewBox="0 0 560 290" role="img" aria-label="速度曲线示意">
-              <defs>
-                <linearGradient id="traceGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#48dfff"/>
-                  <stop offset="100%" stop-color="#d7ff3f"/>
-                </linearGradient>
-              </defs>
-              <rect x="42" y="28" width="486" height="218" rx="10" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.07)"/>
-              <line x1="42" y1="137" x2="528" y2="137" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3 5"/>
-              <rect x="42" y="126" width="486" height="22" fill="rgba(215,255,63,0.06)"/>
-              <line x1="42" y1="126" x2="528" y2="126" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4"/>
-              <line x1="42" y1="148" x2="528" y2="148" stroke="rgba(215,255,63,0.35)" stroke-dasharray="4 4"/>
-              <text x="50" y="120" fill="#6f7f92" font-family="monospace" font-size="9">+34%</text>
-              <text x="50" y="164" fill="#6f7f92" font-family="monospace" font-size="9">-34%</text>
-              <path d="M62 62 C150 62 178 62 205 70 C250 84 268 120 286 137 C300 151 310 170 324 178"
-                fill="none" stroke="url(#traceGrad)" stroke-width="3" stroke-linecap="round"/>
-              <path d="M324 178 C340 190 352 194 378 194" fill="none" stroke="#ff5268" stroke-width="2.4" stroke-linecap="round"/>
-              <line x1="205" y1="52" x2="205" y2="230" stroke="rgba(72,223,255,.35)" stroke-dasharray="2 4"/>
-              <line x1="286" y1="52" x2="286" y2="230" stroke="rgba(255,182,72,.4)" stroke-dasharray="2 4"/>
-              <line x1="324" y1="52" x2="324" y2="230" stroke="rgba(215,255,63,.5)" stroke-dasharray="2 4"/>
-              <circle cx="205" cy="68" r="4" fill="#48dfff"/>
-              <circle cx="286" cy="137" r="4" fill="#ffb648"/>
-              <circle cx="324" cy="178" r="4" fill="#d7ff3f"/>
-              <text x="195" y="248" fill="#8b98aa" font-family="monospace" font-size="9">RELEASE</text>
-              <text x="270" y="248" fill="#8b98aa" font-family="monospace" font-size="9">COUNTER</text>
-              <text x="315" y="248" fill="#8b98aa" font-family="monospace" font-size="9">SHOT</text>
-              <text x="370" y="248" fill="#ff5268" font-family="monospace" font-size="9">OVERSHOOT</text>
-            </svg>
-            <div class="art-caption">
-              <span>旧方向 +215 u/s</span><span>0</span><span>反方向过冲</span>
-            </div>
-          </div>
-        </div>
+      <div class="page-head">
+        <h1 class="page-title">急停实验室</h1>
+        <p class="lead">A→D 的 keyup/keydown 只能说明你按了什么，说明不了你有没有停下来。MAGLAB PRO 用 Source 移动物理重建你的速度曲线：松键、反键、摩擦、反向加速、开枪时机，全部记录。</p>
+        <button class="btn btn-primary" id="heroStartBtn" type="button">配置测试</button>
       </div>
 
       <div class="setup-grid">
@@ -194,7 +145,7 @@
         </div>
 
         <aside class="panel protocol-card">
-          <div class="panel-head"><h3>测试协议</h3><span>STANDARD</span></div>
+          <div class="panel-head"><h3>测试协议</h3></div>
           <ol class="protocol-list">
             <li><span>01</span><div><b>按住方向键</b><p>按住 A 或 D，保持到目标出现。测试会在你达到该武器最大速度后才给提示。</p></div></li>
             <li><span>02</span><div><b>松旧键 + 点按反键</b><p>目标出现后松开旧键，点按反方向键。不要用 Snap Tap；本测试只模拟手动输入。</p></div></li>
@@ -211,7 +162,6 @@
 
       <section class="pro-section" id="method">
         <div class="section-head">
-          <div class="kicker">WHY THIS IS DIFFERENT</div>
           <h2>普通 A/D 测试，<span class="text-lime">测不到急停。</span></h2>
           <p>急停的核心不是“按了反方向键”，而是速度在什么时间、以什么方式归零，以及你何时开枪。</p>
         </div>
@@ -241,7 +191,6 @@
 
       <section class="pro-section">
         <div class="section-head">
-          <div class="kicker">PHYSICS / LIMITS</div>
           <h2>模型透明，<span class="text-lime">边界清楚。</span></h2>
         </div>
         <div class="method-grid">
@@ -271,7 +220,7 @@
     <section class="screen" id="screen-test">
       <div class="test-top">
         <div>
-          <div class="kicker">LIVE RUN / <span id="testRoleLabel">BASELINE</span></div>
+          <div class="kicker"><span id="testRoleLabel">BASELINE</span></div>
           <h2 id="testTitle">REP 01 / 20</h2>
         </div>
         <div class="test-top-actions">
@@ -357,7 +306,7 @@
           </div>
 
           <div class="panel protocol-mini">
-            <div class="panel-head"><h3>当前条件</h3><span>LOCKED</span></div>
+            <div class="panel-head"><h3>当前条件</h3></div>
             <div class="stat-box"><span>武器</span><b id="liveWeapon">AK-47</b></div>
             <div class="stat-box"><span>精度带</span><b id="liveBand">≤ 73 u/s</b></div>
             <div class="stat-box"><span>物理步长</span><b>1 ms</b></div>
@@ -393,7 +342,6 @@
       </div>
       <div class="report-head">
         <div>
-          <div class="kicker">COUNTER-STRAFE REPORT</div>
           <h1 id="reportTitle">急停报告</h1>
           <p class="report-meta" id="reportMeta">—</p>
         </div>
@@ -480,7 +428,7 @@
       </div>
 
       <div class="panel validation-panel">
-        <div class="panel-head"><h3>游戏内复验</h3><span>EXTERNAL VALIDITY</span></div>
+        <div class="panel-head"><h3>游戏内复验</h3></div>
         <div class="validation-grid">
           <div>
             <h4>Counter-strafe Master</h4>
@@ -502,6 +450,7 @@
         <div class="action-group">
           <button class="btn btn-ghost" id="copyReportBtn" type="button">复制摘要</button>
           <button class="btn btn-ghost" id="downloadCsvBtn" type="button">导出 CSV</button>
+          <button class="btn btn-ghost" id="exportBaselineBtn" type="button">导出实验室基准</button>
           <button class="btn btn-ghost" id="printReportBtn" type="button">打印 / PDF</button>
           <button class="btn btn-primary" id="startABBtnBottom" type="button">测试第二套配置</button>
         </div>
@@ -510,10 +459,8 @@
   </main>
 
   <footer class="site-footer pro-footer">
-    <div>MAGLAB PRO · CS2 急停实验室</div>
     <div>本地运行 · Source 物理模型 · 不读取游戏内存 · 不替代游戏内验证</div>
     <div><a href="basic.html">基础习惯测试（静置 / 连点 / 悬停）→</a></div>
-    <div><a href="tools.html">MAGLAB 磁轴工具箱（传感器角度 / 运算延迟优化）→</a></div>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

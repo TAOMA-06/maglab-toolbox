@@ -59,9 +59,9 @@
 }
 
 .panel {
-  padding: 22px;
+  padding: 24px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius);
   background: linear-gradient(160deg, rgba(15, 23, 34, 0.86), rgba(9, 14, 21, 0.92));
 }
 
@@ -171,7 +171,7 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-.opt-actions .btn { min-height: 46px; padding: 0 20px; font-size: 13px; }
+.opt-actions .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
 
 .opt-note-box {
   margin-top: 14px;
