@@ -171,10 +171,13 @@ func LoadJSON(path string) (*model.Analysis, error)
   - 站位：`ExposureMaxDistance=2500`、`ExposureConeHalfAngle=45`、
     `IsolatedTeammateDist=800`、`CoverRadius=200`、`CoverWindowSec=10`、`HotZoneRadius=400`。
   - 对枪：`PreAimBadDeg`、`MovingFireSpeedUPS`（M2b 用实测分布校准，只改常量）。
-- 高危站位规则（用户 2026-11-01 拍板，2026-11-01 评审收紧）：
-  `ExposedLines >= 2 || (CoverEvaluated && !CoverUtility && Isolated)`。
+- 高危站位规则（2026-11-08）：
+  `HighRisk = CoverEvaluated && !CoverUtility && Isolated`。
+  暴露枪线单独不算高危（`exposed_deaths` 仍计数，但不据此叫高危）。
   队友全死记 `LastAlive`，不算 `Isolated`；无道具事实时 `CoverEvaluated=false`，
   不得用 `CoverUtility` 的默认 false 判「无掩护」。
+- 对枪预瞄：`PreAimFailed = measured && raw > PreAimBadDeg && raw <= PreAimFlankDeg`；
+  `Flanked = measured && raw > PreAimFlankDeg`（大于 90° 是被侧身或背身，不算没预瞄；正好 90° 仍算预瞄失败）。
 - 「暴露枪线」是**视锥近似**（存活敌人 + 距离 + 敌人朝向对准你），不是视线遮挡；
   输出文案必须带「近似」。
 - 分位统计用最近秩；样本为 0 时输出 0。
@@ -184,6 +187,8 @@ func LoadJSON(path string) (*model.Analysis, error)
 - `report.Markdown/HTML` 在判决 / 好回合后输出 `## 站位分析`、`## 对枪分析` 两节；
   纯事实版与 LLM 版都必须有。HTML 与 Markdown 共用同一 `page` 事实。
   报告不再输出「丢分原因频次」；`LostRoundCauses` 仍留在分析数据里。
+  split 按再死间隔（`SplitCloseSec`=10 秒）分「紧接着 / 隔开了」两种说法；
+  第一屏在整场句后有一条「移动中开枪」改法；对枪明细仍留在后面的「对枪分析」。
 - `coach.ReportPrompt` 的 system 固定结构追加 `## 站位解读`、`## 对枪解读`（在「好回合」后、
   「追问建议」前）；user 数据加入两模块事实与分布；引用仍受 `ValidateCitations` 校验。
 - `qa.Retrieve` 关键词追加 positioning（站位/死位/枪线/暴露）与 dueling（预瞄/急停/对枪/准星）。
@@ -267,7 +272,7 @@ func HTML(a *model.Analysis, interpret string) (string, error)
 ```
 
 - interpret 为空时输出 **纯事实版**（规则层数据 + 提示「配置 LLM 后可得解读」）——保证无 LLM 也可用。
-- Markdown 结构：判决（整场句 + 要你改的 / 分开的 / 其余）/ 好回合 / 站位 / 对枪 / 追问入口。报告不再输出「丢分原因频次」；`LostRoundCauses` 仍在分析数据。事实部分一律从 Analysis 生成，不依赖 LLM；开场判决不被 interpret 覆盖。
+- Markdown 结构：判决（整场句 + 移动中开枪一条 + 分开间隔提示 + 要你改的 / 分开的 / 其余）/ 好回合 / 站位 / 对枪 / 追问入口。报告不再输出「丢分原因频次」；`LostRoundCauses` 仍在分析数据。事实部分一律从 Analysis 生成，不依赖 LLM；开场判决不被 interpret 覆盖。
 - HTML 与 Markdown 内容一致，样式参考 `docs/html-style-note.md`（深色、JetBrains Mono、卡片式）。
 
 ---

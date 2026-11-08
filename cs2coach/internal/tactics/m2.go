@@ -38,6 +38,9 @@ const (
 	// 基线（pov + arsham + s2，85 个可评估对枪）：P50 1.2° / P75 3.2° / P90 8.5°；
 	// 15° 只命中约 5%，属于「保守、只抓明显没瞄」的档位，避免把正常拉枪误判成预瞄失败。
 	PreAimBadDeg = 15.0
+	// PreAimFlankDeg 是背身/侧身分界（度）：原始预瞄角 > 它记 flanked，不算没预瞄。
+	// 正好 90° 仍算预瞄失败；比较用原始角度，不用四舍五入后的一位小数。
+	PreAimFlankDeg = 90.0
 	// MovingFireSpeedUPS 是「移动中开枪」阈值（u/s）：开枪瞬间水平速度 > 它记未急停。
 	// 基线（仅枪械射击，已排除刀/投掷物）：P50 0–15 / P75 0–36 / P90 25–82；
 	// 100 u/s 是偏保守档位（各 demo 命中 <10%），只抓明显还在跑动的开枪。
@@ -240,9 +243,9 @@ func buildPositioning(c *roundCtx, kills []model.KillEvent) *model.PositionDeath
 			}
 		}
 
-		// 4. 高危规则：暴露枪线 >= 2 条，或「有掩护数据 + 无掩护 + 队友远」。
-		// 道具数据缺失时不得用 CoverUtility 的默认 false 判「无掩护」。
-		pa.HighRisk = pa.ExposedLines >= 2 || (pa.CoverEvaluated && !pa.CoverUtility && pa.Isolated)
+		// 4. 高危规则（2026-11-08）：有掩护数据、没罩住、且队友远。
+		// 暴露枪线单独不算高危；道具数据缺失时不得用 CoverUtility 的默认 false 判「无掩护」。
+		pa.HighRisk = pa.CoverEvaluated && !pa.CoverUtility && pa.Isolated
 
 		// 5. 量化理由（中文事实句，含数字；不写主观形容词）。数据缺失的分支不生成句子。
 		if nearestIdx >= 0 {
@@ -510,7 +513,9 @@ func buildDuel(c *roundCtx, d model.DuelFact, f, o *model.DuelPlayerFact) model.
 		da.FirstShotDiffSec = round2(float64(f.FirstShotTick-o.FirstShotTick) / c.rate)
 	}
 	// 焦点没开火的对枪不评预瞄/急停：那是「没接火」或「被单方面打死」，不是预瞄失败。
-	da.PreAimFailed = measured && preAimRaw > PreAimBadDeg
+	// 大于 90° 是被侧身或背身（flanked），不算没预瞄；正好 90° 仍算预瞄失败。
+	da.PreAimFailed = measured && preAimRaw > PreAimBadDeg && preAimRaw <= PreAimFlankDeg
+	da.Flanked = measured && preAimRaw > PreAimFlankDeg
 	da.MovingShot = measured && f.SpeedValid && f.Speed > MovingFireSpeedUPS
 	switch {
 	case d.KillerID != "" && d.KillerID == c.focusID:
@@ -541,6 +546,9 @@ func duelVerdict(da model.DuelAnalysis) string {
 		b.WriteString("无接敌瞬间快照，不评估预瞄/急停；")
 	} else {
 		fmt.Fprintf(&b, "预瞄偏差 %.1f°（阈值 %.0f°）；", da.PreAimDeltaDeg, PreAimBadDeg)
+		if da.Flanked {
+			b.WriteString("大于 90°，这是被侧身或背身，不是没预瞄；")
+		}
 		switch {
 		case da.FocusFirstShotTick == 0:
 			b.WriteString("焦点未开火，急停不可测；")
@@ -628,6 +636,9 @@ func buildDuelingReport(m *model.Match, rounds []model.RoundAnalysis, focusID st
 			preAim = append(preAim, d.PreAimDeltaDeg)
 			if d.PreAimFailed {
 				rep.PreAimFailures++
+			}
+			if d.Flanked {
+				rep.Flanked++
 			}
 		}
 		if d.FocusFirstShotTick > 0 {

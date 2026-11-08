@@ -99,7 +99,8 @@ type DuelingReport struct {
 	Measured         int                `json:"measured"`           // 有接敌快照、可评估预瞄的对枪数
 	Fired            int                `json:"fired"`              // 焦点实际开火、可评估急停的对枪数
 	KillOnly         int                `json:"kill_only"`          // 仅有击杀快照（缺枪械伤害事件的降级）
-	PreAimFailures   int                `json:"pre_aim_failures"`   // 预瞄角度差超阈值的对枪数
+	PreAimFailures   int                `json:"pre_aim_failures"`   // 预瞄角度差超阈值的对枪数（不含背身/侧身）
+	Flanked          int                `json:"flanked"`            // 预瞄角 > 90°、被侧身或背身的对枪数
 	MovingShots      int                `json:"moving_shots"`       // 开火瞬间速度超阈值的对枪数
 	FirstShotWins    int                `json:"first_shot_wins"`    // 焦点先开火且拿到击杀
 	FirstHitterFocus int                `json:"first_hitter_focus"` // 焦点先命中（造成第一次伤害）的对枪数
@@ -170,8 +171,10 @@ type DuelAnalysis struct {
 	// FirstHitter 是本次接敌谁先命中：focus / opponent / none（无伤害事实，例如 GOTV 仅有击杀）。
 	FirstHitter  string `json:"first_hitter"`
 	PreAimFailed bool   `json:"pre_aim_failed"`
-	MovingShot   bool   `json:"moving_shot"`
-	Verdict      string `json:"verdict"` // 中文事实句（数字 + 可回看 tick）
+	// Flanked 表示预瞄原始角 > 90°：被侧身或背身，不算没预瞄。
+	Flanked    bool   `json:"flanked"`
+	MovingShot bool   `json:"moving_shot"`
+	Verdict    string `json:"verdict"` // 中文事实句（数字 + 可回看 tick）
 }
 
 // FocusSummary 是焦点玩家画像。
@@ -316,6 +319,11 @@ type RoundCall struct {
 	FocusKillerName string `json:"focus_killer_name,omitempty"`
 	FocusWeapon     string `json:"focus_weapon,omitempty"`
 	FocusTick       int    `json:"focus_tick,omitempty"`
+
+	// 再死间隔（仅 split）。秒数 = (FocusTick - Tick) / TickRate；比较用原始秒数。
+	GapSec   float64 `json:"gap_sec,omitempty"`
+	GapKnown bool    `json:"gap_known,omitempty"`
+	GapClose bool    `json:"gap_close,omitempty"` // true = 紧接着（<= SplitCloseSec）
 }
 
 // OpeningInfo 是开局对枪事实+规则标注。

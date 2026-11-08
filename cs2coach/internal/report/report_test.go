@@ -46,10 +46,12 @@ func sampleAnalysis() *model.Analysis {
 			lostCall(7, model.CallSplit, &model.RoundCall{
 				Kind: model.CallSplit, VictimName: "队友m", KillerName: "z", Weapon: "M4A1", Tick: 70500,
 				FocusKillerName: "y", FocusWeapon: "AK-47", FocusTick: 72000,
+				GapSec: 8.234375, GapKnown: true, GapClose: true,
 			}),
 			lostCall(14, model.CallSplit, &model.RoundCall{
 				Kind: model.CallSplit, VictimName: "队友n", KillerName: "y", Weapon: "AK-47", Tick: 140500,
 				FocusKillerName: "y", FocusWeapon: "AK-47", FocusTick: 142000,
+				GapSec: 23.4375, GapKnown: true, GapClose: false,
 			}),
 		},
 	}
@@ -81,7 +83,12 @@ func sampleInterpret() string {
 }
 
 func TestMarkdownVerdictFactsOnly(t *testing.T) {
-	got, err := Markdown(sampleAnalysis(), "")
+	a := sampleAnalysis()
+	a.Dueling = &model.DuelingReport{
+		Total: 43, MovingShots: 21,
+		Thresholds: model.DuelThresholds{MovingFireSpeedUPS: 100},
+	}
+	got, err := Markdown(a, "")
 	if err != nil {
 		t.Fatalf("Markdown() error = %v", err)
 	}
@@ -94,11 +101,14 @@ func TestMarkdownVerdictFactsOnly(t *testing.T) {
 		{"判决标记", "**判决**："},
 		{"不能说主因", "这场输了，不能说主因不在你"},
 		{"计数", "纯队友的有 1 分，队友先倒你后来又死的有 2 分，你先死的有 1 分"},
-		{"分开提示", splitHint},
+		{"对枪条", "对枪这一条：移动中开枪 21/43（开火速度超过 100 u/s）。"},
+		{"紧接着提示", splitHintClose},
+		{"隔开了提示", splitHintFar},
 		{"要你改的标题", "### 要你改的"},
 		{"分开的标题", "### 分开的"},
 		{"回合5你的", "回合 5 是你的。你先被 y 用 AWP 打死（tick 50120）。下次这下别先死。demo_gototick 50120"},
-		{"回合7分开", "回合 7 分开。队友m 先被 z 用 M4A1 打死（tick 70500），那下不是你的。你后来被 y 用 AK-47 打死（tick 72000）。demo_gototick 72000"},
+		{"回合7紧接着", "回合 7 分开，紧接着（隔了 8.2 秒）。队友m 先被 z 用 M4A1 打死（tick 70500），那下不是你的。你后来被 y 用 AK-47 打死（tick 72000）。下次这下别再送进去。demo_gototick 72000"},
+		{"回合14隔开了", "回合 14 分开，隔开了（隔了 23.4 秒）。队友n 先被 y 用 AK-47 打死（tick 140500），那下不是你的。你后来被 y 用 AK-47 打死（tick 142000）。隔太久，这分不要求你改送进去。demo_gototick 142000"},
 		{"回合3队友", "回合 3 是队友的"},
 		{"纯事实版注记", factsOnlyNote},
 		{"好回合标题", "## 值得保留的好回合"},
@@ -106,7 +116,7 @@ func TestMarkdownVerdictFactsOnly(t *testing.T) {
 		{"站位分析", "## 站位分析"},
 		{"对枪分析", "## 对枪分析"},
 		{"追问入口", "## 追问入口"},
-		{"CLI 示例", `cs2coach ask <analysis.json> "第3回合我为什么不转点？"`},
+		{"追问提示", followUpHint},
 	}
 	for _, w := range wantSubstrings {
 		if !strings.Contains(got, w.in) {
@@ -118,6 +128,7 @@ func TestMarkdownVerdictFactsOnly(t *testing.T) {
 		"## 丢分回合 Top3",
 		"## 丢分原因频次",
 		"那下是你的",
+		"队友先倒之后你又死了的",
 		"**下把怎么改",
 		"**为什么错",
 		"开局对枪前先架默认位",
@@ -128,7 +139,10 @@ func TestMarkdownVerdictFactsOnly(t *testing.T) {
 		}
 	}
 	if strings.Count(got, "别再把自己送进去") != 1 {
-		t.Errorf("提示句应只出现一次，实际 %d", strings.Count(got, "别再把自己送进去"))
+		t.Errorf("紧接着提示应只出现一次，实际 %d", strings.Count(got, "别再把自己送进去"))
+	}
+	if strings.Count(got, "对枪这一条：移动中开枪") != 1 {
+		t.Errorf("第一屏对枪条应只出现一次，实际 %d", strings.Count(got, "对枪这一条：移动中开枪"))
 	}
 }
 
@@ -314,10 +328,11 @@ func TestFormatCallLine(t *testing.T) {
 		Call: &model.RoundCall{
 			Kind: model.CallSplit, VictimName: "DONK", KillerName: "翻斗社会图图", Weapon: "SSG 08", Tick: 32279,
 			FocusKillerName: "twisstzz-CS", FocusWeapon: "Desert Eagle", FocusTick: 32596,
+			GapSec: 4.953125, GapKnown: true, GapClose: true,
 		},
 	}
 	got := formatCallLine(ra)
-	want := "回合 6 分开。DONK 先被 翻斗社会图图 用 SSG 08 打死（tick 32279），那下不是你的。你后来被 twisstzz-CS 用 Desert Eagle 打死（tick 32596）。demo_gototick 32596"
+	want := "回合 6 分开，紧接着（隔了 5.0 秒）。DONK 先被 翻斗社会图图 用 SSG 08 打死（tick 32279），那下不是你的。你后来被 twisstzz-CS 用 Desert Eagle 打死（tick 32596）。下次这下别再送进去。demo_gototick 32596"
 	if got != want {
 		t.Errorf("formatCallLine =\n%q\nwant\n%q", got, want)
 	}

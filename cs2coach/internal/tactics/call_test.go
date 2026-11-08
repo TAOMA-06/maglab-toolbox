@@ -119,6 +119,42 @@ func TestMatchVerdictLeadHalfThreshold(t *testing.T) {
 	}
 }
 
+func TestFillSplitGap(t *testing.T) {
+	mk := func(tick, focusTick int) *model.RoundCall {
+		return &model.RoundCall{
+			Kind: model.CallSplit, Tick: tick, FocusTick: focusTick,
+		}
+	}
+	t.Run("正好10秒是紧接着", func(t *testing.T) {
+		c := mk(1000, 1000+640) // 640/64 = 10.0
+		fillSplitGap(c, 64)
+		if !c.GapKnown || !c.GapClose || c.GapSec != 10 {
+			t.Fatalf("got known=%v close=%v sec=%v, want known close 10", c.GapKnown, c.GapClose, c.GapSec)
+		}
+	})
+	t.Run("多1tick是隔开了", func(t *testing.T) {
+		c := mk(1000, 1000+641) // 641/64 = 10.015625
+		fillSplitGap(c, 64)
+		if !c.GapKnown || c.GapClose || c.GapSec <= 10 {
+			t.Fatalf("got known=%v close=%v sec=%v, want known far >10", c.GapKnown, c.GapClose, c.GapSec)
+		}
+	})
+	t.Run("tickrate为0不编秒数", func(t *testing.T) {
+		c := mk(100, 200)
+		fillSplitGap(c, 0)
+		if c.GapKnown || c.GapClose || c.GapSec != 0 {
+			t.Fatalf("got known=%v close=%v sec=%v, want unknown", c.GapKnown, c.GapClose, c.GapSec)
+		}
+	})
+	t.Run("非split不填", func(t *testing.T) {
+		c := &model.RoundCall{Kind: model.CallYours, Tick: 100, FocusTick: 200}
+		fillSplitGap(c, 64)
+		if c.GapKnown || c.GapClose || c.GapSec != 0 {
+			t.Fatalf("yours 不应填间隔: %+v", c)
+		}
+	})
+}
+
 func TestFillRoundCallsOnLostRounds(t *testing.T) {
 	m := testMatch()
 	a, err := Analyze(m, Options{})

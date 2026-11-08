@@ -90,6 +90,7 @@ func TestReportPromptM2User(t *testing.T) {
 		"开火速度 P50 80 / P75 160 / P90 220 u/s",
 		"回合 2 [tick 6000] 对 王五：预瞄偏差 23.4°",
 		"暴露枪线是视锥近似",
+		"高危不含单独的暴露枪线",
 	} {
 		if !strings.Contains(user, want) {
 			t.Errorf("user 缺少 M2 要素 %q", want)

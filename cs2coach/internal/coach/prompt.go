@@ -360,7 +360,7 @@ func writePositioningFacts(b *strings.Builder, a *model.Analysis) {
 			fmt.Fprintf(b, "  - 回合 %d [tick %d] %s\n", row.round, row.tick, row.text)
 		}
 	}
-	b.WriteString("- 注意：暴露枪线是视锥近似，不是视线遮挡；不许写「敌人能看到你」。\n")
+	b.WriteString("- 注意：暴露枪线是视锥近似，不是视线遮挡；高危不含单独的暴露枪线；不许写「敌人能看到你」。\n")
 }
 
 // coachHighRiskRow 是提示词里的一条高危死亡事实。

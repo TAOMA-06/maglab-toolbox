@@ -16,8 +16,16 @@ func renderMarkdown(p *page) string {
 	b.WriteString("**判决**：")
 	b.WriteString(p.Verdict.Lead)
 	b.WriteString("\n\n")
-	if p.Verdict.Hint != "" {
-		b.WriteString(p.Verdict.Hint)
+	if p.Verdict.Duel != "" {
+		b.WriteString(p.Verdict.Duel)
+		b.WriteString("\n\n")
+	}
+	if p.Verdict.HintClose != "" {
+		b.WriteString(p.Verdict.HintClose)
+		b.WriteString("\n\n")
+	}
+	if p.Verdict.HintFar != "" {
+		b.WriteString(p.Verdict.HintFar)
 		b.WriteString("\n\n")
 	}
 	if p.Verdict.empty() {
@@ -70,8 +78,7 @@ func renderMarkdown(p *page) string {
 
 	// 5. 追问入口
 	b.WriteString("## 追问入口\n\n")
-	b.WriteString("用 CLI 继续追问（检索该回合数据回答）：\n\n")
-	fmt.Fprintf(&b, "```\n%s\n```\n\n", p.CliExample)
+	fmt.Fprintf(&b, "%s\n\n", p.CliExample)
 	if len(p.Questions) > 0 {
 		b.WriteString("示例问题：\n\n")
 		for _, q := range p.Questions {
@@ -113,7 +120,7 @@ func writePositioningMD(b *strings.Builder, v positioningView) {
 			b.WriteString("\n\n")
 		} else {
 			for _, row := range v.HighRisk {
-				fmt.Fprintf(b, "- 回合 %d [tick %d] %s\n", row.Round, row.Tick, row.Text)
+				fmt.Fprintf(b, "- 回合 %d [tick %d] demo_gototick %d %s\n", row.Round, row.Tick, row.Tick, row.Text)
 			}
 			b.WriteString("\n")
 		}

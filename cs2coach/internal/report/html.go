@@ -129,7 +129,9 @@ const htmlTpl = `<!DOCTYPE html>
   <section class="card">
     <h2>判决</h2>
     <p class="lead">{{.Verdict.Lead}}</p>
-    {{- if .Verdict.Hint}}<p class="facts">{{.Verdict.Hint}}</p>{{end}}
+    {{- if .Verdict.Duel}}<p class="facts">{{.Verdict.Duel}}</p>{{end}}
+    {{- if .Verdict.HintClose}}<p class="facts">{{.Verdict.HintClose}}</p>{{end}}
+    {{- if .Verdict.HintFar}}<p class="facts">{{.Verdict.HintFar}}</p>{{end}}
     {{- if and (not .Verdict.Yours) (not .Verdict.Split) (not .Verdict.Other)}}<p class="facts">本场没有丢分回合。</p>{{end}}
     {{- if .Verdict.Yours}}
     <h3 class="h-yours">要你改的</h3>
@@ -180,7 +182,7 @@ const htmlTpl = `<!DOCTYPE html>
       <h3>高危站位</h3>
       {{- if not .Positioning.HighRisk}}<div class="ev">{{.NoHighRiskText}}</div>{{end}}
       {{- range .Positioning.HighRisk}}
-      <div class="ev">回合 {{.Round}} [tick {{.Tick}}] {{nl2br .Text}}</div>
+      <div class="ev">回合 {{.Round}} [tick {{.Tick}}] demo_gototick {{.Tick}} {{nl2br .Text}}</div>
       {{- end}}
     </div>
     {{- end}}
@@ -218,8 +220,7 @@ const htmlTpl = `<!DOCTYPE html>
   <section>
     <h2>追问入口</h2>
     <div class="card">
-      <p>用 CLI 继续追问（检索该回合数据回答）：</p>
-      <div class="cli">{{.CliExample}}</div>
+      <p>{{.CliExample}}</p>
       {{- if .Questions}}
       <p>示例问题：</p>
       <ul>

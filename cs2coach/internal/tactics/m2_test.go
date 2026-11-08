@@ -269,9 +269,9 @@ func TestHighRiskRule(t *testing.T) {
 		wantReason string // 必须出现的理由片段
 	}{
 		{
-			"暴露 2 条枪线 → 高危",
+			"暴露 2 条枪线 + 队友近 → 不高危（暴露单独不算）",
 			[]model.PlayerSnapshot{enemyEast, enemyNorth, mateClose}, nil,
-			true, "暴露枪线 2 条（视锥近似）",
+			false, "视锥近似",
 		},
 		{
 			"无掩护且孤立 → 高危（第二分支）",
@@ -408,7 +408,10 @@ func TestDuelGeometryAndVerdict(t *testing.T) {
 		t.Errorf("PreAimDeltaDeg = %v want 90", da.PreAimDeltaDeg)
 	}
 	if !da.PreAimFailed {
-		t.Error("90° > 15° 应判预瞄失败")
+		t.Error("正好 90° 仍应判预瞄失败")
+	}
+	if da.Flanked {
+		t.Error("正好 90° 不应记 flanked")
 	}
 	if !da.HasBothShots {
 		t.Error("双方都有首发 tick，HasBothShots 应为 true")
@@ -432,6 +435,47 @@ func TestDuelGeometryAndVerdict(t *testing.T) {
 		if !strings.Contains(da.Verdict, want) {
 			t.Errorf("Verdict 缺少 %q: %s", want, da.Verdict)
 		}
+	}
+	if strings.Contains(da.Verdict, "被侧身或背身") {
+		t.Errorf("正好 90° 不应写被侧身或背身: %s", da.Verdict)
+	}
+}
+
+func TestDuelFlankedAbove90(t *testing.T) {
+	r := &model.Round{Number: 9, StartTick: 46000, EndTick: 52000}
+	c := m2Ctx(r)
+	// 焦点朝东（yaw 0），对手在西南偏南方向，使原始预瞄角约 111°（> 90）。
+	d := model.DuelFact{
+		StartTick: 46738,
+		RoundTime: 1.2,
+		A: model.DuelPlayerFact{
+			SteamID64: testFocus, Name: "焦点", Side: model.SideT,
+			Pos: model.Vec3{}, Yaw: 0, Speed: 40, SpeedValid: true,
+			FirstShotTick: 46738, Shots: 2, Hits: 0, Damage: 0,
+		},
+		B: model.DuelPlayerFact{
+			SteamID64: sid(e1U64), Name: "侧身敌", Side: model.SideCT,
+			Pos: model.Vec3{X: -360, Y: -960}, Yaw: 90,
+			FirstShotTick: 46740, Shots: 3, Hits: 1, Damage: 100,
+		},
+		KillTick: 46800, KillerID: sid(e1U64), VictimID: testFocus, Weapon: "AK-47",
+	}
+	duels := buildDuels(c, []model.DuelFact{d})
+	if len(duels) != 1 {
+		t.Fatalf("应有 1 条对枪，got %d", len(duels))
+	}
+	da := duels[0]
+	if da.PreAimDeltaDeg <= PreAimFlankDeg {
+		t.Fatalf("预瞄角 = %v，本用例需要 > %.0f", da.PreAimDeltaDeg, PreAimFlankDeg)
+	}
+	if da.PreAimFailed {
+		t.Error("大于 90° 不应判预瞄失败")
+	}
+	if !da.Flanked {
+		t.Error("大于 90° 应记 flanked")
+	}
+	if !strings.Contains(da.Verdict, "大于 90°，这是被侧身或背身，不是没预瞄") {
+		t.Errorf("Verdict 缺少背身说明: %s", da.Verdict)
 	}
 }
 
@@ -656,12 +700,13 @@ func TestDuelingReportNilWhenNoDuels(t *testing.T) {
 // ---------- Analyze 接线 / 旧数据降级 ----------
 
 func TestAnalyzeM2Wiring(t *testing.T) {
-	// 焦点被击杀：2 条暴露枪线 + 队友很远 + 无掩护 -> 高危；同时有一条对枪。
+	// 焦点被击杀：有道具数据但无烟火掩护 + 队友很远 -> 高危；暴露枪线单独不算。
+	flashOnly := []model.UtilityEvent{{Type: "flash", ThrowerSide: model.SideT, EffectStart: 9000, EffectEnd: 0}}
 	r := m2DeathRound(1, 10050, model.Vec3{}, 0, []model.PlayerSnapshot{
 		m2Snap(sid(e1U64), "敌1", model.SideCT, 1000, 0, 180),
 		m2Snap(sid(e2U64), "敌2", model.SideCT, 0, 1000, 270),
 		m2Snap(sid(mateU64), "队友A", model.SideT, 1200, 0, 0),
-	}, nil)
+	}, flashOnly)
 	r.Duels = []model.DuelFact{{
 		StartTick: 10040,
 		A:         model.DuelPlayerFact{SteamID64: testFocus, Name: "焦点", Side: model.SideT, Pos: model.Vec3{}, Yaw: 0, Speed: 20, SpeedValid: true, FirstShotTick: 10040, Shots: 2, Hits: 1},
@@ -691,8 +736,8 @@ func TestAnalyzeM2Wiring(t *testing.T) {
 		t.Fatal("应有全场站位汇总")
 	}
 	p := a.Positioning
-	if p.Deaths != 1 || p.HighRiskCount != 1 || p.ExposedDeaths != 1 || p.NoCoverDeaths != 0 || p.IsolatedDeaths != 1 {
-		t.Errorf("站位汇总错（无道具数据时 NoCover 不计数）: %+v", p)
+	if p.Deaths != 1 || p.HighRiskCount != 1 || p.ExposedDeaths != 1 || p.NoCoverDeaths != 1 || p.IsolatedDeaths != 1 {
+		t.Errorf("站位汇总错（有道具数据但无烟火应计 NoCover）: %+v", p)
 	}
 	if p.HighRiskRate != 1 {
 		t.Errorf("HighRiskRate = %v want 1", p.HighRiskRate)

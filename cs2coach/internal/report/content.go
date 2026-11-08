@@ -28,25 +28,30 @@ var genericQuestions = []string{
 	"好回合里的做法怎么复制到下一把？",
 }
 
-// splitHint 是整场有分开局时、回合列表前只加一次的提示。
-const splitHint = "队友先倒之后你又死了的，下次就改这一下：别再把自己送进去。先倒的那下你照旧。"
+// 分开按再死间隔的两种提示（各最多出现一次）。
+const (
+	splitHintClose = "隔了不到或等于 10 秒又死的，下次就改这一下：别再把自己送进去。先倒的那下你照旧。"
+	splitHintFar   = "隔了超过 10 秒才死的，不是同一下，不要求你改送进去。"
+)
 
 // tagQuestions 是无 LLM 时按归因标签生成的追问示例。
+// 补枪失败 / 道具缺口已从判决里排除，不再当追问示例。
 var tagQuestions = map[string]string{
 	model.CauseFirstBloodGift: "我为什么会白给首杀？",
-	model.CauseTradeFail:      "队友倒下后我为什么没补上枪？",
-	model.CauseUtilityGap:     "这回合道具怎么配才够用？",
 	model.CauseEcoForce:       "强起局应该怎么打才不白给？",
 	model.CauseClutchThrow:    "这个残局我该怎么打？",
 	model.CauseManAdvLost:     "人数优势为什么会丢？",
 }
+
+// followUpHint 是页底追问入口文案（md/html 共用；不再教人打 CLI）。
+const followUpHint = "接着问用窗口里的「追问」，不用打命令。"
 
 // M2 固定文案：Markdown / HTML 共用同一份，避免两套事实各写一遍。
 const (
 	missingPositioningText = "本场未采到站位数据（需要 M2 解析字段）。"
 	missingDuelingText     = "本场未采到对枪数据（需要 M2 解析字段）。"
 	noHotZoneText          = "本场无死亡热区数据。"
-	noHighRiskText         = "本场无命中高危规则的死亡（暴露枪线 ≥2 或 无掩护且孤立）。"
+	noHighRiskText         = "本场无命中高危规则的死亡（最近队友超过 800，且死亡前没有己方烟/火罩住落点；残局不算）。"
 	noDuelRowsText         = "本场无对枪明细。"
 	unknownPosLabel        = "未标注点位"
 	unknownOpponent        = "未知对手"
@@ -70,13 +75,15 @@ type page struct {
 }
 
 // verdictView 是赛后判决第一屏（Markdown / HTML 同一份文字）。
-// 顺序：要你改的(yours) → 分开的(split) → teammate/unknown（无小标题）。
+// 顺序：整场句 → 对枪条 → 分开提示 → 要你改的(yours) → 分开的(split) → teammate/unknown。
 type verdictView struct {
-	Lead  string   // 整场开场句
-	Hint  string   // S>0 时的一次提示，可空
-	Yours []string // 「要你改的」
-	Split []string // 「分开的」事实清单
-	Other []string // teammate / unknown，不加小标题
+	Lead      string   // 整场开场句
+	Duel      string   // 第一屏对枪条（移动中开枪）
+	HintClose string   // 有紧接着的分开时，一次提示
+	HintFar   string   // 有隔开了的分开时，一次提示
+	Yours     []string // 「要你改的」
+	Split     []string // 「分开的」事实清单
+	Other     []string // teammate / unknown，不加小标题
 }
 
 // empty 表示本场没有任何丢分判决行。
@@ -175,11 +182,7 @@ func buildPageWithBaseline(a *model.Analysis, interpret string, baseline *LabBas
 	}
 	p.Title = fmt.Sprintf("教练复盘 · %s %s · 焦点玩家 %s", p.Map, p.Score, p.FocusName)
 
-	roundNo := 1
-	if len(a.Story.FocusLostRounds) > 0 {
-		roundNo = a.Story.FocusLostRounds[0]
-	}
-	p.CliExample = fmt.Sprintf(`cs2coach ask <analysis.json> "第%d回合我为什么不转点？"`, roundNo)
+	p.CliExample = followUpHint
 	p.Questions = buildQuestions(a, interpret)
 	p.HowTo = howToText
 	return p, nil
@@ -216,9 +219,23 @@ func buildVerdict(a *model.Analysis) verdictView {
 	sort.SliceStable(yours, func(i, j int) bool { return yours[i].Number < yours[j].Number })
 	sort.SliceStable(split, func(i, j int) bool { return split[i].Number < split[j].Number })
 	sort.SliceStable(other, func(i, j int) bool { return other[i].Number < other[j].Number })
-	counts := tactics.CountCalls(a.Rounds)
-	if counts.Split > 0 {
-		v.Hint = splitHint
+	v.Duel = formatDuelTip(a.Dueling)
+	var hasClose, hasFar bool
+	for _, ra := range split {
+		if ra.Call == nil || !ra.Call.GapKnown {
+			continue
+		}
+		if ra.Call.GapClose {
+			hasClose = true
+		} else {
+			hasFar = true
+		}
+	}
+	if hasClose {
+		v.HintClose = splitHintClose
+	}
+	if hasFar {
+		v.HintFar = splitHintFar
 	}
 	for _, ra := range yours {
 		v.Yours = append(v.Yours, formatCallLine(ra))
@@ -230,6 +247,18 @@ func buildVerdict(a *model.Analysis) verdictView {
 		v.Other = append(v.Other, formatCallLine(ra))
 	}
 	return v
+}
+
+// formatDuelTip 第一屏对枪条：只用已有的 MovingShots / Total / 速度阈值。
+func formatDuelTip(d *model.DuelingReport) string {
+	if d == nil || d.Total == 0 {
+		return "这场没有可计的对枪。"
+	}
+	if d.MovingShots == 0 {
+		return fmt.Sprintf("移动中开枪 0/%d。这场不要求你改急停。", d.Total)
+	}
+	speed := int(d.Thresholds.MovingFireSpeedUPS)
+	return fmt.Sprintf("对枪这一条：移动中开枪 %d/%d（开火速度超过 %d u/s）。", d.MovingShots, d.Total, speed)
 }
 
 // formatCallLine 渲染单个丢分回合的判决行（Markdown / HTML 共用）。
@@ -248,8 +277,19 @@ func formatCallLine(ra model.RoundAnalysis) string {
 		return fmt.Sprintf("回合 %d 是队友的。%s 先被 %s 用 %s 打死（tick %d），你没再死。下次照旧。demo_gototick %d",
 			n, c.VictimName, c.KillerName, c.Weapon, c.Tick, c.Tick)
 	case model.CallSplit:
-		return fmt.Sprintf("回合 %d 分开。%s 先被 %s 用 %s 打死（tick %d），那下不是你的。你后来被 %s 用 %s 打死（tick %d）。demo_gototick %d",
-			n, c.VictimName, c.KillerName, c.Weapon, c.Tick, c.FocusKillerName, c.FocusWeapon, c.FocusTick, c.FocusTick)
+		body := fmt.Sprintf("%s 先被 %s 用 %s 打死（tick %d），那下不是你的。你后来被 %s 用 %s 打死（tick %d）。",
+			c.VictimName, c.KillerName, c.Weapon, c.Tick, c.FocusKillerName, c.FocusWeapon, c.FocusTick)
+		if !c.GapKnown {
+			return fmt.Sprintf("回合 %d 分开。%s看不出隔了多久，这分不要求你改送进去。demo_gototick %d",
+				n, body, c.FocusTick)
+		}
+		sec := fmt.Sprintf("%.1f", c.GapSec)
+		if c.GapClose {
+			return fmt.Sprintf("回合 %d 分开，紧接着（隔了 %s 秒）。%s下次这下别再送进去。demo_gototick %d",
+				n, sec, body, c.FocusTick)
+		}
+		return fmt.Sprintf("回合 %d 分开，隔开了（隔了 %s 秒）。%s隔太久，这分不要求你改送进去。demo_gototick %d",
+			n, sec, body, c.FocusTick)
 	default:
 		return fmt.Sprintf("回合 %d 看不出是谁先倒。这分不要求你改。", n)
 	}
@@ -315,15 +355,19 @@ func buildPositioning(a *model.Analysis, interpret string) positioningView {
 	return v
 }
 
-// positionSummary 生成站位汇总行：死亡数 / 高危比例 / 阈值。
+// positionSummary 生成站位汇总行：死亡数 / 高危比例 / 规则说明 / 阈值。
 func positionSummary(r model.PositioningReport) string {
 	rate := r.HighRiskRate
 	if rate <= 0 && r.HighRiskCount > 0 && r.Deaths > 0 {
 		rate = float64(r.HighRiskCount) / float64(r.Deaths)
 	}
-	line := fmt.Sprintf("焦点死亡 %d 次，高危 %d 次（%s）",
-		r.Deaths, r.HighRiskCount, formatPct(rate))
+	iso := "800"
 	th := r.Thresholds
+	if th.IsolatedTeammateDist > 0 {
+		iso = formatNum(th.IsolatedTeammateDist)
+	}
+	line := fmt.Sprintf("焦点死亡 %d 次，高危 %d 次（%s）。高危只算最近队友超过 %s、且死亡前没有己方烟/火罩住落点；残局不算。下次别离队友这么远。暴露枪线仍是视锥近似，不算墙，单独不算高危",
+		r.Deaths, r.HighRiskCount, formatPct(rate), iso)
 	if th.ExposureMaxDistance > 0 || th.ExposureConeHalfAngle > 0 || th.IsolatedTeammateDist > 0 {
 		line += fmt.Sprintf("；阈值：暴露距离 %s units / 暴露半角 %s° / 孤立队友间距 %s units / 掩护半径 %s units（死亡前 %s 秒）",
 			formatNum(th.ExposureMaxDistance),
@@ -509,8 +553,8 @@ func duelSummary(d model.DuelingReport) string {
 	if unmeasured < 0 {
 		unmeasured = 0
 	}
-	line := fmt.Sprintf("对枪 %d 次（预瞄可评估 %d 次，无接敌快照 %d 次；焦点开火 %d 次，先手命中 %d 次；焦点击杀 %d / 阵亡 %d），预瞄超阈值 %d 次，移动中开枪 %d 次",
-		d.Total, d.Measured, unmeasured, d.Fired, d.FirstHitterFocus, d.FocusKills, d.FocusDeaths, d.PreAimFailures, d.MovingShots)
+	line := fmt.Sprintf("对枪 %d 次（预瞄可评估 %d 次，无接敌快照 %d 次；焦点开火 %d 次，先手命中 %d 次；焦点击杀 %d / 阵亡 %d），预瞄超阈值 %d 次，被侧身或背身 %d 次，移动中开枪 %d 次",
+		d.Total, d.Measured, unmeasured, d.Fired, d.FirstHitterFocus, d.FocusKills, d.FocusDeaths, d.PreAimFailures, d.Flanked, d.MovingShots)
 	th := d.Thresholds
 	if th.PreAimBadDeg > 0 || th.MovingFireSpeedUPS > 0 {
 		line += fmt.Sprintf("；阈值：预瞄偏差 %s° / 开火速度 %s u/s",

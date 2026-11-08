@@ -15,6 +15,7 @@ __pycache__/
 *.pyo
 build/
 dist/
+!cs2coach/gui/frontend/dist/
 *.spec
 
 # 编辑器 / IDE

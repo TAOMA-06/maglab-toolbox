@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS2 复盘教练</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="logo">
+      <div class="mark">🎯</div>
+      <div>
+        <b>CS2 复盘教练</b>
+        <span>cs2coach</span>
+      </div>
+    </div>
+
+    <nav id="nav">
+      <button class="nav-item active" data-step="1"><span class="n">1</span><span class="label">选择 Demo</span><span class="dot"></span></button>
+      <button class="nav-item locked" data-step="2"><span class="n">2</span><span class="label">焦点玩家</span><span class="dot"></span></button>
+      <button class="nav-item locked" data-step="3"><span class="n">3</span><span class="label">解读模式</span><span class="dot"></span></button>
+      <button class="nav-item locked" data-step="4"><span class="n">4</span><span class="label">一键运行</span><span class="dot"></span></button>
+      <button class="nav-item locked" data-step="5"><span class="n">5</span><span class="label">复盘报告</span><span class="dot"></span></button>
+      <button class="nav-item locked" data-step="6"><span class="n">6</span><span class="label">追问</span><span class="dot"></span></button>
+    </nav>
+
+    <div class="side-foot">
+      <button id="btn-settings" class="ghost" title="LLM 设置">⚙️ <span>设置</span></button>
+      <div class="side-note">
+        本地运行 · 数据不出本机<br>
+        <code id="workdir">…</code>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- ============ 步骤 1：选 demo ============ -->
+    <section class="panel active" id="step-1">
+      <div class="page-head">
+        <h2>选择 Demo<span class="sub">解析前先确认文件</span></h2>
+        <span id="s1-state" class="badge">未选择</span>
+      </div>
+      <p class="lead">选一场 CS2 录像（<code>.dem</code>）。游戏内「观看比赛」下载的是 GOTV 全景录像，需要手动指定要复盘的玩家；POV 自存录像会自动认出录制者。</p>
+
+      <div id="dropzone" class="dropzone">
+        <div class="zicon">📂</div>
+        <p>把 <code>.dem</code> 文件拖到这里，或</p>
+        <p><button id="btn-browse" class="primary big">选择 demo 文件</button></p>
+        <p class="hint">只读本地文件；不会上传任何数据</p>
+      </div>
+
+      <div id="file-info" class="card hidden" style="margin-top:16px">
+        <div class="card-head">
+          <b>📄 文件信息</b>
+          <span id="fi-pov" class="badge">GOTV</span>
+        </div>
+        <dl class="kv">
+          <dt>文件名</dt><dd id="fi-name">—</dd>
+          <dt>大小</dt><dd id="fi-size">—</dd>
+          <dt>修改时间</dt><dd id="fi-time">—</dd>
+          <dt>完整路径</dt><dd id="fi-path">—</dd>
+          <dt>玩家数</dt><dd id="fi-players">—</dd>
+        </dl>
+        <div class="row end" style="margin-top:14px">
+          <button id="btn-reprobe" class="small ghost">重新读取</button>
+          <button id="btn-to-step2" class="primary">下一步：选焦点玩家 →</button>
+        </div>
+      </div>
+
+      <div id="s1-error" class="note err hidden"></div>
+    </section>
+
+    <!-- ============ 步骤 2：焦点玩家 ============ -->
+    <section class="panel" id="step-2">
+      <div class="page-head">
+        <h2>选择焦点玩家<span class="sub">报告只围绕这个人的视角</span></h2>
+        <span id="s2-state" class="badge">未选择</span>
+      </div>
+      <p class="lead">焦点玩家决定「我方的输赢回合」与归因方向。POV 录像的录制者会被自动选中。</p>
+
+      <div id="pov-note" class="note info hidden"></div>
+      <div id="player-list" class="player-list"></div>
+      <div id="player-empty" class="note hidden">还没有读取玩家名单，请先在步骤 1 选择 demo。</div>
+
+      <div class="row end" style="margin-top:20px">
+        <button class="ghost" data-goto="1">← 返回</button>
+        <button id="btn-to-step3" class="primary">下一步：选解读模式 →</button>
+      </div>
+    </section>
+
+    <!-- ============ 步骤 3：解读模式 ============ -->
+    <section class="panel" id="step-3">
+      <div class="page-head">
+        <h2>解读模式<span class="sub">事实永远由规则层产出，LLM 只解读不发明</span></h2>
+        <span id="s3-state" class="badge">纯事实</span>
+      </div>
+      <p class="lead">三种模式输出同一份事实骨架，区别只在「教练解读」由谁写。任何模式下报告都会带 tick 证据与 <code>demo_gototick</code> 回看指令。</p>
+
+      <div class="mode-grid" id="mode-grid">
+        <button class="mode-card sel" data-mode="facts">
+          <div class="mt">🧾 纯事实 <span class="tag">offline</span></div>
+          <div class="md">不调用任何模型。规则层直接给出丢分原因、Top3 回合、证据 tick。最快、零成本、完全离线。</div>
+        </button>
+        <button class="mode-card" data-mode="ollama">
+          <div class="mt">💻 本地 Ollama <span class="tag">localhost</span></div>
+          <div class="md">用本机 Ollama 的 OpenAI 兼容端点生成解读，录像数据不出本机，只慢一点。</div>
+        </button>
+        <button class="mode-card" data-mode="api">
+          <div class="mt">☁️ 外部 API <span class="tag">anthropic / openai</span></div>
+          <div class="md">Claude 官方 SDK 或 OpenAI 兼容网关（DeepSeek、Kimi…）。解读质量最好，会产生费用。</div>
+        </button>
+      </div>
+
+      <div id="ollama-box" class="card hidden" style="margin-top:14px">
+        <div class="card-head"><b>Ollama 连接</b><span id="ollama-state" class="badge">未检测</span></div>
+        <div class="row">
+          <label class="field grow">服务地址（含 /v1）
+            <input id="ollama-url" placeholder="http://localhost:11434/v1" spellcheck="false">
+          </label>
+          <label class="field grow">模型
+            <input id="ollama-model" placeholder="qwen2.5:7b" spellcheck="false">
+          </label>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button id="btn-check-ollama" class="small">测试连接</button>
+          <span class="hint">需先安装 Ollama 并 <code>ollama pull &lt;模型&gt;</code></span>
+        </div>
+      </div>
+
+      <div id="api-box" class="card hidden" style="margin-top:14px">
+        <div class="card-head"><b>外部 API</b><span id="api-state" class="badge">未配置</span></div>
+        <p class="hint" id="api-summary">—</p>
+        <div class="row">
+          <button id="btn-open-settings" class="small">打开设置填 Key</button>
+          <button id="btn-check-api" class="small">检查配置</button>
+          <span class="hint">Key 只写本机 <code>settings.json</code>（0600），不进仓库</span>
+        </div>
+      </div>
+
+      <div class="row end" style="margin-top:20px">
+        <button class="ghost" data-goto="2">← 返回</button>
+        <button id="btn-to-step4" class="primary">下一步：运行分析 →</button>
+      </div>
+    </section>
+
+    <!-- ============ 步骤 4：运行 ============ -->
+    <section class="panel" id="step-4">
+      <div class="page-head">
+        <h2>一键运行<span class="sub">parse → analyze → report</span></h2>
+        <span id="s4-state" class="badge">待运行</span>
+      </div>
+      <p class="lead">一次把「解析事实 → 规则归因 → 教练解读 → 渲染报告」跑完，产物同时写入输出目录。</p>
+
+      <div class="card">
+        <div class="row">
+          <div class="grow">
+            <div class="hint" style="margin-bottom:4px">输出目录</div>
+            <input id="outdir" readonly placeholder="默认：应用数据目录/runs/&lt;demo 名&gt;">
+          </div>
+          <button id="btn-outdir" class="small">更改…</button>
+          <button id="btn-open-outdir" class="small ghost">打开</button>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button id="btn-run" class="primary big">▶ 开始分析</button>
+          <span class="hint" id="run-summary">—</span>
+        </div>
+      </div>
+
+      <div class="card progress-wrap">
+        <div class="prog-top">
+          <div>
+            <div class="hint">当前阶段</div>
+            <div id="prog-stage" style="font-weight:600">等待开始</div>
+          </div>
+          <div class="pct" id="prog-pct">0%</div>
+        </div>
+        <div class="bar" id="bar"><i id="bar-fill"></i></div>
+        <div class="prog-msg" id="prog-msg">选好玩家与模式后点「开始分析」。</div>
+        <ul class="stages" id="stages">
+          <li data-stage="parse"><span class="ico"></span>解析 demo（事实层）</li>
+          <li data-stage="analyze"><span class="ico"></span>规则归因（tactics 层）</li>
+          <li data-stage="interpret"><span class="ico"></span>LLM 解读（可选）</li>
+          <li data-stage="report"><span class="ico"></span>渲染报告（Markdown + HTML）</li>
+        </ul>
+      </div>
+
+      <div id="run-warning" class="note hidden"></div>
+    </section>
+
+    <!-- ============ 步骤 5：报告 ============ -->
+    <section class="panel" id="step-5">
+      <div class="page-head">
+        <h2>复盘报告<span class="sub">证据可回看</span></h2>
+        <div class="row tight">
+          <button id="btn-open-report" class="small ghost">浏览器打开</button>
+          <button id="btn-copy-md" class="small ghost">复制 Markdown</button>
+        </div>
+      </div>
+
+      <div id="report-meta" class="report-meta"></div>
+      <div id="report-warning" class="note hidden"></div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="html">报告预览</button>
+        <button class="tab" data-tab="md">Markdown</button>
+        <button class="tab" data-tab="facts">归因数据</button>
+      </div>
+
+      <div class="pane active" id="pane-html">
+        <iframe id="report-frame" title="复盘报告预览"></iframe>
+        <p class="hint" style="margin-top:8px">HTML 报告自包含（内联样式，无外链），可直接发给队友。</p>
+      </div>
+
+      <div class="pane" id="pane-md">
+        <div class="md-body" id="md-render"></div>
+      </div>
+
+      <div class="pane" id="pane-facts">
+        <div id="facts-body"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="row">
+          <span class="hint">想换一种解读再出报告？（复用已解析数据，不必重跑 demo）</span>
+          <span class="spacer"></span>
+          <select id="regen-mode" style="width:auto">
+            <option value="facts">纯事实</option>
+            <option value="ollama">本地 Ollama</option>
+            <option value="api">外部 API</option>
+          </select>
+          <button id="btn-regen" class="small">重新生成报告</button>
+        </div>
+      </div>
+
+      <div class="row end" style="margin-top:18px">
+        <button class="ghost" data-goto="4">← 运行参数</button>
+        <button id="btn-to-step6" class="primary">下一步：追问 →</button>
+      </div>
+    </section>
+
+    <!-- ============ 步骤 6：追问 ============ -->
+    <section class="panel" id="step-6">
+      <div class="page-head">
+        <h2>追问<span class="sub">先检索事实，再交给模型</span></h2>
+        <span id="ask-mode" class="badge">纯事实</span>
+      </div>
+      <p class="lead">问题里带回合号或关键词（残局 / 首杀 / 补枪 / 道具 / 经济 / 下包）命中率最高。回答只引用这份报告里的事实。</p>
+
+      <div class="chips" id="suggestions">
+        <button class="chip">第 3 回合为什么先死？</button>
+        <button class="chip">残局为什么总输？</button>
+        <button class="chip">哪些回合是经济局强起？</button>
+        <button class="chip">道具用得怎么样？</button>
+      </div>
+
+      <div id="chat" class="chat"></div>
+
+      <div class="row" style="margin-top:14px">
+        <input id="chat-input" placeholder="例如：第 5 回合我们人数占优为什么还丢分？" autocomplete="off">
+        <button id="btn-ask" class="primary">发送</button>
+      </div>
+      <p class="hint" style="margin-top:8px">Enter 发送。LLM 不可用时自动退回纯事实回答，不会编造。</p>
+    </section>
+  </main>
+</div>
+
+<!-- ============ 设置弹窗 ============ -->
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-box">
+    <div>
+      <h2>LLM 设置 <span class="sub">只存本机，不上传</span></h2>
+      <p class="hint" style="margin:6px 0 0">外部 API 用于步骤 3 的「外部 API」模式；本地 Ollama 不需要 Key。</p>
+    </div>
+
+    <div class="sep"></div>
+    <h3 style="margin:0">外部 API</h3>
+    <div class="grid2">
+      <label class="field">服务商
+        <select id="set-provider">
+          <option value="">跟随环境变量</option>
+          <option value="anthropic">Anthropic（Claude）</option>
+          <option value="openai">OpenAI 兼容（DeepSeek / Kimi…）</option>
+        </select>
+      </label>
+      <label class="field">模型（空=默认）
+        <input id="set-model" placeholder="claude-opus-5-5 / gpt-4o-mini" spellcheck="false">
+      </label>
+    </div>
+    <label class="field">API Key
+      <input id="set-key" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false">
+    </label>
+    <label class="field">自定义网关（可选）
+      <input id="set-base" placeholder="https://api.deepseek.com/v1" spellcheck="false">
+    </label>
+
+    <div class="sep"></div>
+    <h3 style="margin:0">本地 Ollama</h3>
+    <div class="grid2">
+      <label class="field">服务地址（含 /v1）
+        <input id="set-ollama-url" placeholder="http://localhost:11434/v1" spellcheck="false">
+      </label>
+      <label class="field">模型
+        <input id="set-ollama-model" placeholder="qwen2.5:7b" spellcheck="false">
+      </label>
+    </div>
+    <label class="field">默认输出目录（可选）
+      <input id="set-outdir" placeholder="默认：应用数据目录/runs/&lt;demo 名&gt;" spellcheck="false">
+    </label>
+
+    <div class="sep"></div>
+    <div class="row">
+      <button id="set-test" class="small">测试当前模式</button>
+      <span class="spacer"></span>
+      <button id="set-cancel" class="ghost">取消</button>
+      <button id="set-save" class="primary">保存</button>
+    </div>
+    <p class="hint">Key 写入 <code>~/Library/Application Support/cs2coach/settings.json</code>（权限 0600）。</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

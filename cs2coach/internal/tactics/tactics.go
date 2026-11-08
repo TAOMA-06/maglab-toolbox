@@ -24,6 +24,8 @@ type Options struct {
 const (
 	// DefaultTradeWindowSec 是默认补枪窗口：A 死后 5s 内队友补掉凶手才算成功补枪。
 	DefaultTradeWindowSec = 5.0
+	// SplitCloseSec 是「分开」再死算紧接着的上限（秒）= 补枪窗口的 2 倍。
+	SplitCloseSec = DefaultTradeWindowSec * 2
 	// BuyFullAvg 是 full 判定线：人均冻结结束装备值 >= 4750。
 	BuyFullAvg = 4750.0
 	// BuyForceMinAvg 是 force 下限：人均 [2500, 4750) 且花了钱才算 force/half。
@@ -299,7 +301,26 @@ func fillRoundCalls(a *model.Analysis, m *model.Match, focusID string) {
 			}
 		}
 		ra.Call = judgeRoundCall(sortedKills(r.Kills), focusSide, focusID)
+		fillSplitGap(ra.Call, a.Meta.TickRate)
 	}
+}
+
+// fillSplitGap 给 split 填再死间隔。judgeRoundCall 只判四类，不猜 tick rate。
+// 比较用原始秒数；TickRate<=0 或 FocusTick<Tick 时 GapKnown=false，不编秒数。
+func fillSplitGap(call *model.RoundCall, tickRate float64) {
+	if call == nil || call.Kind != model.CallSplit {
+		return
+	}
+	if tickRate <= 0 || call.FocusTick < call.Tick {
+		call.GapKnown = false
+		call.GapClose = false
+		call.GapSec = 0
+		return
+	}
+	sec := float64(call.FocusTick-call.Tick) / tickRate
+	call.GapSec = sec
+	call.GapKnown = true
+	call.GapClose = sec <= SplitCloseSec
 }
 
 // judgeRoundCall 按我方谁先死判定 yours / teammate / split / unknown。
