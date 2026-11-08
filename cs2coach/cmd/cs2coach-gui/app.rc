@@ -1,0 +1,33 @@
+#include <windows.h>
+
+// 应用图标
+1 ICON "app.ico"
+
+// 版本信息（文件属性 → 详细信息页）
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_APP
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904E4"
+    {
+      VALUE "CompanyName",      "cs2coach"
+      VALUE "FileDescription",  "CS2 复盘教练"
+      VALUE "FileVersion",      "1.0.0"
+      VALUE "InternalName",     "cs2coach-gui"
+      VALUE "OriginalFilename", "cs2coach-gui.exe"
+      VALUE "ProductName",      "CS2 复盘教练"
+      VALUE "ProductVersion",   "1.0.0"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x409, 1252
+  }
+}
+
+// 应用清单：UTF-8 代码页 + Per-Monitor DPI 感知（高分屏不糊）
+1 RT_MANIFEST "app.manifest"

@@ -1,0 +1,49 @@
+{
+  "features": [
+    "rounds",
+    "kills",
+    "deaths",
+    "assists",
+    "damage",
+    "adr",
+    "kd",
+    "kast_proxy",
+    "first_kills",
+    "first_deaths",
+    "multi2",
+    "multi3p",
+    "survived",
+    "kills_t",
+    "kills_ct",
+    "deaths_t",
+    "deaths_ct",
+    "pistol_kills"
+  ],
+  "importance_gain_pct": {
+    "rounds": 0.76,
+    "kills": 4.01,
+    "deaths": 0.25,
+    "assists": 0.27,
+    "damage": 1.6,
+    "adr": 67.06,
+    "kd": 16.2,
+    "kast_proxy": 0.54,
+    "first_kills": 0.09,
+    "first_deaths": 0.14,
+    "multi2": 2.13,
+    "multi3p": 4.36,
+    "survived": 0.3,
+    "kills_t": 0.77,
+    "kills_ct": 0.17,
+    "deaths_t": 0.44,
+    "deaths_ct": 0.23,
+    "pistol_kills": 0.69
+  },
+  "metrics": {
+    "mae": 0.060215408621310994,
+    "baseline_mae": 0.3066811594202899,
+    "spearman": 0.9628053458702177,
+    "n_valid": 46
+  },
+  "seed": 7
+}

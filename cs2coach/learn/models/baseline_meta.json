@@ -1,0 +1,147 @@
+{
+  "n_samples": 219,
+  "n_features": 37,
+  "feature_names": [
+    "map",
+    "half",
+    "focus_buy",
+    "enemy_buy",
+    "first_killer_side",
+    "first_victim_side",
+    "round_number",
+    "score_diff",
+    "money_diff",
+    "equip_diff",
+    "t_equip_freeze_end",
+    "ct_equip_freeze_end",
+    "t_money",
+    "ct_money",
+    "t_money_spent",
+    "ct_money_spent",
+    "first_kill_round_time",
+    "has_first_kill",
+    "traded_within_window",
+    "focus_util_before_contact",
+    "enemy_util_before_contact",
+    "flash_count",
+    "smoke_count",
+    "he_count",
+    "molotov_count",
+    "he_damage_total",
+    "start_t_alive",
+    "start_ct_alive",
+    "utility_diff",
+    "total_util",
+    "eco_round",
+    "force_round",
+    "enemy_eco",
+    "enemy_force",
+    "man_disadvantage",
+    "is_clutch",
+    "clutch_disadvantage_2vX"
+  ],
+  "cat_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "cat_encoders": {
+    "map": {
+      "1_2v2_6thAug23_64cf951f9b4ce6b86c73b089": 0,
+      "Anubis_ShortMatch_2023-08-04": 1,
+      "arsham_infernocs2_1stSept23": 2,
+      "cs2_valve_mm_8thAug23_ancient": 3,
+      "ebot_monte_vs_og_roobet_cup_2023_anubis": 4,
+      "esplay_nnQccdWWJtkc_2025_vertigo": 5,
+      "esplay_nvBBvqNCfFHV_2025_train": 6,
+      "esportal_6008132_2023_mirage": 7,
+      "esportal_6045888_2024_mirage": 8,
+      "esportligaen_6a173af37c12e17acad1185e_2026_mirage": 9,
+      "fastcup_11851975_11876310_202312171749_2023_mirage": 10,
+      "pov": 11,
+      "s2": 12
+    },
+    "half": {
+      "H1": 0,
+      "H2": 1,
+      "OT1": 2,
+      "OT2": 3,
+      "OT3": 4
+    },
+    "focus_buy": {
+      "eco": 0,
+      "force": 1,
+      "full": 2,
+      "half": 3
+    },
+    "enemy_buy": {
+      "eco": 0,
+      "force": 1,
+      "full": 2,
+      "half": 3
+    },
+    "first_killer_side": {
+      "": 0,
+      "CT": 1,
+      "T": 2
+    },
+    "first_victim_side": {
+      "": 0,
+      "CT": 1,
+      "T": 2
+    }
+  },
+  "cv_folds": 5,
+  "cv_auc_mean": 0.7745,
+  "cv_auc_std": 0.056,
+  "cv_acc_mean": 0.6983,
+  "class_distribution": {
+    "focus_won_0": 107,
+    "focus_won_1": 112
+  },
+  "top_features": [
+    {
+      "name": "ct_money_spent",
+      "importance": 213.0
+    },
+    {
+      "name": "t_equip_freeze_end",
+      "importance": 199.0
+    },
+    {
+      "name": "equip_diff",
+      "importance": 189.0
+    },
+    {
+      "name": "ct_equip_freeze_end",
+      "importance": 163.0
+    },
+    {
+      "name": "t_money_spent",
+      "importance": 151.0
+    },
+    {
+      "name": "first_kill_round_time",
+      "importance": 147.0
+    },
+    {
+      "name": "he_count",
+      "importance": 138.0
+    },
+    {
+      "name": "utility_diff",
+      "importance": 133.0
+    },
+    {
+      "name": "smoke_count",
+      "importance": 117.0
+    },
+    {
+      "name": "enemy_util_before_contact",
+      "importance": 114.0
+    }
+  ]
+}

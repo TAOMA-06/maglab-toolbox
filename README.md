@@ -13,6 +13,12 @@
 
 **打开方式**：双击 `打开工具箱.bat`（或 `打开工具箱.vbs`）进导航页；各模块也可直接用 Chrome / Edge 打开对应 `html`。Windows 桌面版见 [main.py](#windows-桌面版可选)。
 
+## 赛后教练引擎
+
+五个入口里的「赛后」仍打开 `coach/index.html`，那是已经验收的沙二报告。
+
+要跑、要改的教练引擎在 `cs2coach/`。进入那个目录再执行 `go test` 和 `go run ./cmd/cs2coach`。模块名仍是 `cs2-demo-review`。demo、训练数据和本地二进制不在这个目录里。旧仓库 `TAOMA-06/cs2-demo-review` 这轮不改。
+
 ---
 
 ## 模块一 · 磁轴设置 / 急停实验室

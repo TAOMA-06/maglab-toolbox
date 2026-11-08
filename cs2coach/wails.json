@@ -1,0 +1,23 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "cs2coach",
+  "outputfilename": "cs2coach-gui",
+  "assetdir": "gui/frontend/dist",
+  "frontend:dir": "gui/frontend/dist",
+  "frontend:install": "",
+  "frontend:build": "",
+  "frontend:dev:watcher": "",
+  "frontend:dev:serverUrl": "",
+  "wailsjsdir": "gui/frontend/wailsjs",
+  "author": {
+    "name": "cs2coach",
+    "email": ""
+  },
+  "info": {
+    "companyName": "cs2coach",
+    "productName": "CS2 复盘教练",
+    "productVersion": "1.0.0",
+    "copyright": "本地工具，数据不出本机",
+    "comments": "CS2 demo 复盘教练"
+  }
+}

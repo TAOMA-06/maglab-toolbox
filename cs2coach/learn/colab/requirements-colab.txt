@@ -1,0 +1,18 @@
+# Colab 训练依赖（T4 16GB 实测组合；Colab 自带 torch，不用重装）
+#
+# 用法（Colab cell）：
+#   !pip install -q -r requirements-colab.txt
+#
+# 说明：
+# - bitsandbytes 提供 4bit 量化（QLoRA），1.5B 在 T4 上约占 6-8GB；
+# - peft 提供 LoRA；accelerate 负责 device_map；
+# - datasets 可选（脚本默认只用标准库读 jsonl，装了则走流式）；
+# - 不锁死 transformers 大版本，避免和 Colab 预装 torch 冲突。
+
+bitsandbytes
+accelerate
+peft
+transformers
+datasets
+pyyaml
+huggingface_hub

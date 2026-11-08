@@ -1,0 +1,10 @@
+# Optional dependencies for learn/demo_fetch.
+#
+# The core fetcher uses only the Python standard library + curl + 7z/bsdtar.
+# Install this file only if you want the `pwa` source (Perfect World Arena),
+# which needs the compiled PWA request signer shipped by cs-demo-downloader.
+#
+#   uv pip install --python learn/.venv/bin/python -r learn/requirements-demos.txt
+#
+# The bundled signer covers Python 3.9-3.12 on macOS/Linux/Windows.
+cs-demo-downloader>=1.3

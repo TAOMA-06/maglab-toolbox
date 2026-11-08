@@ -1,0 +1,44 @@
+# A 层（MLX LoRA 微调）配置 —— 换底座模型只需要改 base_model 一行
+#
+# 训练脚本：learn/train_sft.py（读这个文件，生成 mlx-lm 的训练配置）
+# 数据脚本：learn/build_sft.py（读 lora.max_seq_length 做长度预算检查）
+#
+# 注意：base_model 必须是 mlx-community 的 4bit 量化权重。
+# 4bit 底座 + LoRA = QLoRA，这是 Mac 上唯一可用的量化微调路径。
+
+base_model: mlx-community/Qwen2.5-1.5B-Instruct-4bit
+
+# 候选底座（不会被程序自动读取，是给人切换/对照实验用的清单）。
+# 选型理由见 learn/README.md「底座模型怎么选」。
+alternatives:
+  - mlx-community/DeepSeek-R1-Distill-Qwen-1.5B-4bit
+  - mlx-community/Qwen3-1.7B-4bit
+  - mlx-community/Qwen3-0.6B-4bit
+
+# 数据目录：build_sft.py 的默认输出（train.jsonl / valid.jsonl / test.jsonl）
+data_dir: learn/data/sft
+# 适配器输出（mlx_lm.lora --adapter-path）；只有 LoRA 权重，不是完整模型
+adapter_path: learn/models/coach-adapter
+# --fuse 之后的完整模型目录（可以直接给 mlx_lm.generate / mlx_lm.server 用）
+fused_path: learn/models/coach-fused
+
+lora:
+  fine_tune_type: lora        # lora | dora | full；4bit 底座只能用 lora/dora
+  num_layers: 16              # 只微调最后 16 层；内存吃紧降到 8，数据多再升到 -1
+  batch_size: 1               # 1.5B QLoRA 实测 3-4GB；64GB 机器可试 2
+  grad_accumulation_steps: 4  # 等效 batch 4，不额外吃内存
+  learning_rate: 1.0e-4       # 小数据风格迁移；loss 抖动大就降到 2.0e-5
+  iters: 600                  # 实测 0.29-0.49 it/s → 约 20-35 分钟
+  max_seq_length: 2048        # 中文约 1 token/字，prompt+completion 控制在 1200 字内最稳
+  mask_prompt: true           # 只对 completion 算 loss（completions 格式支持）
+  grad_checkpoint: true       # 用时间换内存，1.5B 上建议开
+  seed: 42
+  val_batches: 5
+  steps_per_report: 10
+  steps_per_eval: 100
+  save_every: 200
+  optimizer: adamw
+  lora_parameters:
+    rank: 8
+    scale: 16.0
+    dropout: 0.05

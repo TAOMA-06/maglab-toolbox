@@ -1,0 +1,40 @@
+# 大体积 demo / 压缩包不入库
+testdata/demos/*.dem
+testdata/demos/*.dem.info
+testdata/demos/*.7z
+testdata/demos/s2/*.dem
+*.dem
+*.dem.bz2
+*.7z
+*.zip
+
+# 构建产物
+/cs2coach
+/build/
+/dist/
+/wailsjs/
+/gui/frontend/dist/
+
+# 生成物（可复现）
+testdata/e2e-out/
+testdata/fixtures/
+out/
+learn/data/
+learn/models/winrate/
+
+# demo_fetch 拉取的数据与清单（大体积/可重建）
+learn/data/*_demos/
+learn/data/imported/
+learn/data/**/manifest.jsonl
+learn/data/**/failed.jsonl
+learn/data/**/.tmp/
+
+# Python / 训练环境
+learn/.venv/
+__pycache__/
+*.py[cod]
+
+# 编辑器 / 本地缓存
+.codegraph/
+.pytest_cache/
+.DS_Store

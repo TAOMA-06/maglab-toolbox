@@ -1,0 +1,44 @@
+# TRAIN-PLAN v2 主线：胜率/价值模型（LightGBM）配置
+#
+# 训练脚本：learn/train_winrate.py
+# 数据脚本：cs2coach export（回合级）或 cs2coach run 的 match.json（tick 快照）
+#
+# 数据优先级：
+#   --match-json <match.json|目录>  → tick 快照（v2 主线，推荐）
+#   --snapshots <快照.jsonl>        → tick 快照（外部生成）
+#   --data <samples.jsonl>          → 回合级 v0（兼容现有 export）
+#
+# 验收（TRAIN-PLAN §2 / §5）：
+#   AUC >= 人数差+经济基线 + 0.10
+#   可用回合 >= 1000，否则标记降级玩具版
+#   训练/验证必须按比赛（match）切分，禁止按回合随机切
+
+# 数据源：留空则必须用 CLI 指定 --data / --match-json / --snapshots
+# 也可以在这里固定一个默认路径，例如：
+#   data: learn/data/winrate/samples.jsonl
+#   match_json: out/
+data: []
+match_json: []
+snapshots: []
+
+out_dir: learn/models/winrate
+mode: auto
+
+min_rounds: 1000
+min_auc_delta: 0.10
+valid_ratio: 0.2
+cv_folds: 5
+seed: 42
+drop_draws: true
+
+lightgbm:
+  n_estimators: 300
+  learning_rate: 0.03
+  max_depth: 5
+  num_leaves: 31
+  min_child_samples: 10
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 0.1
+  n_jobs: -1
